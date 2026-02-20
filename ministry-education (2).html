@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ministry of Education Portal | وزارة التعليم</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Georgia',serif;background:#0a0f1e;color:#fff;min-height:100vh;overflow-x:hidden;}
+  ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:#0f172a;} ::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px;}
+  input,select,textarea,button{font-family:'Georgia',serif;}
+  input[type=password]{letter-spacing:2px;}
+
+  /* ── LANGUAGE TOGGLE ── */
+  .lang-toggle{position:fixed;top:18px;right:18px;z-index:9999;display:flex;background:rgba(15,23,42,.9);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:3px;gap:2px;backdrop-filter:blur(12px);}
+  .lang-btn{padding:6px 14px;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .25s;background:transparent;color:#64748b;}
+  .lang-btn.active{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.4);}
+
+  /* ── PAGE SYSTEM ── */
+  .page{display:none;}
+  .page.active{display:block;animation:pageFadeIn .4s cubic-bezier(.4,0,.2,1) forwards;}
+  #loginPage.active{display:flex!important;animation:pageFadeIn .4s cubic-bezier(.4,0,.2,1) forwards;}
+  @keyframes pageFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── CONTENT TRANSITION ── */
+  .content-animate{animation:contentIn .35s cubic-bezier(.4,0,.2,1) both;}
+  @keyframes contentIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── SIDEBAR SLIDE ── */
+  .sidebar{animation:sidebarIn .5s cubic-bezier(.4,0,.2,1) both;}
+  @keyframes sidebarIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+
+  /* ── CARD STAGGER ── */
+  .stagger-1{animation-delay:.05s!important;}
+  .stagger-2{animation-delay:.1s!important;}
+  .stagger-3{animation-delay:.15s!important;}
+  .stagger-4{animation-delay:.2s!important;}
+  .stagger-5{animation-delay:.25s!important;}
+  .stagger-6{animation-delay:.3s!important;}
+
+  /* ── STAT COUNTER ── */
+  @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .stat-val{animation:countUp .6s cubic-bezier(.4,0,.2,1) both;}
+
+  /* ── NAV HOVER ── */
+  .nav-btn{transition:all .22s cubic-bezier(.4,0,.2,1);}
+  .nav-btn:hover{transform:translateX(4px);color:#cbd5e1!important;}
+
+  /* ── SCHOOL CARD ── */
+  .school-card{transition:all .28s cubic-bezier(.4,0,.2,1);}
+  .school-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(59,130,246,.18);}
+
+  /* ── TABLE ROW STAGGER ── */
+  @keyframes rowIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+  .trow-anim{animation:rowIn .3s cubic-bezier(.4,0,.2,1) both;}
+
+  /* ── MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(10px);}
+  .modal-overlay.open{display:flex;animation:overlayIn .2s ease both;}
+  @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+  .modal{animation:modalIn .35s cubic-bezier(.4,0,.2,1) both;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+  /* ── PROGRESS BARS ANIMATE ── */
+  @keyframes progGrow{from{width:0}to{width:var(--w)}}
+  .prog-animated{animation:progGrow .8s cubic-bezier(.4,0,.2,1) both;}
+
+  /* ── LOGIN ── */
+  #loginPage{min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  #loginPage::before{content:'';position:absolute;inset:0;opacity:.05;background-image:repeating-linear-gradient(45deg,#60a5fa 0,#60a5fa 1px,transparent 0,transparent 50%);background-size:20px 20px;}
+  /* Animated orbs */
+  #loginPage::after{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12),transparent 70%);top:-150px;left:-150px;animation:orbFloat 8s ease-in-out infinite;}
+  @keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.08)}}
+  .login-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.1),transparent 70%);bottom:-100px;right:-100px;animation:orbFloat 10s ease-in-out infinite reverse;}
+  .login-wrap{position:relative;width:100%;max-width:440px;padding:24px;animation:loginSlideUp .6s cubic-bezier(.4,0,.2,1) both .1s;}
+  @keyframes loginSlideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+  .login-logo{text-align:center;margin-bottom:36px;}
+  .login-logo .icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 0 60px rgba(59,130,246,.5);animation:iconPulse 3s ease-in-out infinite;}
+  @keyframes iconPulse{0%,100%{box-shadow:0 0 40px rgba(59,130,246,.4)}50%{box-shadow:0 0 80px rgba(59,130,246,.7)}}
+  .login-logo h1{color:#fff;font-size:22px;letter-spacing:2px;font-weight:700;}
+  .login-logo .en-sub{color:#93c5fd;font-size:13px;letter-spacing:3px;margin-top:4px;}
+  .login-logo .ar-sub{color:#a78bfa;font-size:14px;margin-top:4px;font-family:Arial,sans-serif;}
+  .login-card{background:rgba(255,255,255,.05);backdrop-filter:blur(24px);border-radius:24px;border:1px solid rgba(255,255,255,.12);padding:36px;}
+  .role-toggle{display:flex;background:rgba(0,0,0,.3);border-radius:12px;padding:4px;margin-bottom:28px;gap:4px;}
+  .role-btn{flex:1;padding:10px 0;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:1px;transition:all .25s;text-transform:uppercase;font-family:'Georgia',serif;}
+  .role-btn.active{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.35);}
+  .role-btn:not(.active){background:transparent;color:#94a3b8;}
+  .form-group{margin-bottom:16px;transition:all .3s;}
+  .form-group label{display:block;color:#93c5fd;font-size:12px;letter-spacing:1px;margin-bottom:6px;}
+  .form-group input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.3);color:#fff;font-size:14px;outline:none;transition:all .25s;}
+  .form-group input:focus{border-color:rgba(59,130,246,.7);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+  .login-error{color:#f87171;font-size:13px;margin-bottom:14px;text-align:center;background:rgba(239,68,68,.1);padding:8px 12px;border-radius:8px;display:none;animation:shake .4s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+  .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 24px rgba(59,130,246,.4);transition:all .25s;position:relative;overflow:hidden;}
+  .login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .25s;}
+  .login-btn:hover::after{opacity:1;}
+  .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.5);}
+  .login-btn:active{transform:translateY(0);}
+
+  /* ── LAYOUT ── */
+  .app-layout{display:flex;min-height:100vh;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:248px;background:rgba(10,15,30,.95);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;z-index:100;backdrop-filter:blur(20px);}
+  .sidebar-header{padding:28px 20px 20px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .sidebar-header .s-icon{font-size:24px;margin-bottom:6px;}
+  .sidebar-header .s-title{font-size:13px;font-weight:700;letter-spacing:2px;color:#fff;}
+  .sidebar-header .s-sub{font-size:10px;color:#475569;letter-spacing:1px;margin-top:2px;}
+  .sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+  .nav-btn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#64748b;font-size:14px;cursor:pointer;font-family:'Georgia',serif;border-left:3px solid transparent;margin-bottom:4px;text-align:left;}
+  .nav-btn.active-m{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(29,78,216,.1));color:#93c5fd;border-left-color:#3b82f6;}
+  .nav-btn.active-s{background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(5,150,105,.1));color:#6ee7b7;border-left-color:#10b981;}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.07);}
+  .add-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#93c5fd;font-size:13px;cursor:pointer;font-family:'Georgia',serif;margin-bottom:8px;transition:all .25s;}
+  .add-btn:hover{background:rgba(59,130,246,.18);transform:translateY(-1px);}
+  .logout-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;border:none;background:transparent;color:#475569;font-size:13px;cursor:pointer;font-family:'Georgia',serif;transition:all .25s;}
+  .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.06);}
+  .main-content{margin-left:248px;padding:36px 40px;min-height:100vh;width:calc(100% - 248px);}
+
+  /* ── CARDS ── */
+  .card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;transition:border-color .25s;}
+  .card:hover{border-color:rgba(255,255,255,.12);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+  /* ── TABLES ── */
+  table{width:100%;border-collapse:separate;border-spacing:0 6px;}
+  thead th{padding:8px 16px;text-align:left;color:#64748b;font-size:11px;letter-spacing:2px;font-weight:400;}
+  tbody td{padding:13px 16px;background:rgba(255,255,255,.04);font-size:14px;transition:background .2s;}
+  tbody tr:hover td{background:rgba(59,130,246,.08);}
+  tbody td:first-child{border-radius:12px 0 0 12px;}
+  tbody td:last-child{border-radius:0 12px 12px 0;}
+
+  /* ── TAGS ── */
+  .tag{font-size:11px;padding:3px 8px;border-radius:6px;display:inline-block;}
+  .tag-private{background:rgba(139,92,246,.2);color:#a78bfa;}
+  .tag-public{background:rgba(59,130,246,.2);color:#93c5fd;}
+
+  /* ── STATS ── */
+  .stat-card{background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07);padding:20px 22px;position:relative;overflow:hidden;transition:all .28s cubic-bezier(.4,0,.2,1);}
+  .stat-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.14);box-shadow:0 8px 28px rgba(0,0,0,.3);}
+  .stat-card .bg-icon{position:absolute;top:-10px;right:-10px;font-size:52px;opacity:.07;}
+  .stat-val{font-size:28px;font-weight:700;}
+  .stat-label{font-size:12px;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+  /* ── TABS ── */
+  .tab-bar{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:16px;}
+  .tab-pill{padding:8px 16px;border-radius:8px;border:none;background:transparent;color:#64748b;cursor:pointer;font-family:'Georgia',serif;font-size:13px;transition:all .22s;}
+  .tab-pill.active{background:rgba(59,130,246,.25);color:#93c5fd;transform:translateY(-1px);}
+  .tab-pill:hover:not(.active){background:rgba(255,255,255,.05);color:#94a3b8;}
+
+  /* ── FORMS ── */
+  .mform-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .mform-group label{display:block;font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:6px;}
+  .mform-group input,.mform-group select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:14px;font-family:'Georgia',serif;transition:border .22s;}
+  .mform-group input:focus,.mform-group select:focus{outline:none;border-color:rgba(59,130,246,.6);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+  .mform-group select{background:#0f172a;}
+  .modal-footer{display:flex;gap:12px;margin-top:24px;}
+  .btn-cancel{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#94a3b8;cursor:pointer;font-family:'Georgia',serif;transition:all .22s;}
+  .btn-cancel:hover{background:rgba(255,255,255,.05);}
+  .btn-primary{flex:2;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;cursor:pointer;font-family:'Georgia',serif;font-weight:700;transition:all .22s;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(59,130,246,.35);}
+  .btn-green{background:linear-gradient(135deg,#10b981,#059669);}
+
+  /* ── INLINE FORM ── */
+  .inline-form{background:rgba(255,255,255,.05);border-radius:16px;padding:24px;border:1px solid rgba(255,255,255,.1);margin-bottom:24px;animation:contentIn .3s ease both;}
+  .inline-form h3{margin-bottom:16px;font-size:15px;}
+  .ifgrid{display:flex;flex-wrap:wrap;gap:12px;}
+  .ifgrid input,.ifgrid select{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:13px;font-family:'Georgia',serif;flex:1;min-width:140px;transition:border .22s;}
+  .ifgrid input:focus,.ifgrid select:focus{outline:none;border-color:rgba(59,130,246,.6);}
+  .ifgrid select{background:#0f172a;}
+  .if-actions{display:flex;gap:10px;margin-top:14px;}
+  .btn-sm-green{padding:10px 24px;border-radius:8px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:'Georgia',serif;transition:all .22s;}
+  .btn-sm-green:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,.3);}
+  .btn-sm-cancel{padding:10px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#94a3b8;cursor:pointer;font-family:'Georgia',serif;transition:all .22s;}
+
+  /* ── STATUS ── */
+  .status-badge{font-size:12px;padding:3px 10px;border-radius:6px;display:inline-block;}
+
+  /* ── ANNOUNCEMENT ── */
+  .ann-card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;margin-bottom:14px;display:flex;gap:16px;align-items:flex-start;transition:border-color .22s;animation:contentIn .35s ease both;}
+  .ann-card:hover{border-color:rgba(255,255,255,.14);}
+  .ann-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;transition:background .2s;}
+  .ann-del:hover{background:rgba(239,68,68,.1);}
+
+  /* ── CHARTS ── */
+  svg.donut{transform:rotate(-90deg);}
+  .spark{display:flex;align-items:flex-end;gap:3px;}
+  .spark-bar{flex:1;border-radius:3px 3px 0 0;transition:height .3s;}
+  .month-labels{display:flex;justify-content:space-between;margin-top:6px;}
+  .month-labels span{font-size:9px;color:#475569;}
+
+  /* ── SCHOOL CARD ── */
+  .school-card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;cursor:pointer;}
+
+  /* ── MISC ── */
+  .back-btn{background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;font-family:'Georgia',serif;margin-bottom:20px;display:flex;align-items:center;gap:8px;padding:0;transition:color .2s;}
+  .back-btn:hover{color:#93c5fd;}
+  .page-title{font-size:24px;font-weight:700;margin-bottom:6px;}
+  .page-sub{color:#64748b;font-size:14px;margin-bottom:28px;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+  .modal-header h2{color:#fff;font-size:20px;}
+  .close-btn{background:none;border:none;color:#64748b;cursor:pointer;font-size:24px;transition:color .2s;}
+  .close-btn:hover{color:#fff;}
+  textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:'Georgia',serif;font-size:13px;resize:vertical;transition:border .22s;}
+  textarea:focus{outline:none;border-color:rgba(59,130,246,.6);}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .info-field{background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:16px 20px;transition:border-color .22s;}
+  .info-field:hover{border-color:rgba(255,255,255,.14);}
+  .info-field-label{font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:6px;}
+  .info-field-val{font-size:15px;font-weight:600;}
+  .empty{color:#475569;text-align:center;padding:60px 0;}
+  .result-card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto auto auto;gap:32px;align-items:center;transition:border-color .22s,transform .25s;}
+  .result-card:hover{border-color:rgba(255,255,255,.14);transform:translateX(3px);}
+  .result-metric{text-align:center;}
+  .result-metric .rv{font-size:24px;font-weight:700;}
+  .result-metric .rl{font-size:11px;color:#64748b;}
+
+  /* ── ARABIC RTL ── */
+  [dir="rtl"] .main-content{margin-left:0;margin-right:248px;}
+  [dir="rtl"] .sidebar{left:auto;right:0;border-right:none;border-left:1px solid rgba(255,255,255,.07);}
+  [dir="rtl"] .nav-btn{border-left:none;border-right:3px solid transparent;text-align:right;}
+  [dir="rtl"] .nav-btn.active-m{border-right-color:#3b82f6;}
+  [dir="rtl"] .nav-btn.active-s{border-right-color:#10b981;}
+  [dir="rtl"] .nav-btn:hover{transform:translateX(-4px);}
+  [dir="rtl"] .sidebar-header{text-align:right;}
+  [dir="rtl"] .back-btn{flex-direction:row-reverse;}
+  [dir="rtl"] .login-card{direction:rtl;}
+  [dir="rtl"] .lang-toggle{left:18px;right:auto;}
+  [dir="rtl"] .add-btn,.logout-btn{flex-direction:row;}
+  [dir="rtl"] tbody td:first-child{border-radius:0 12px 12px 0;}
+  [dir="rtl"] tbody td:last-child{border-radius:12px 0 0 12px;}
+  [dir="rtl"] thead th{text-align:right;}
+  [dir="rtl"] .result-card:hover{transform:translateX(-3px);}
+</style>
+</head>
+<body>
+
+<!-- Language Toggle -->
+<div class="lang-toggle">
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('ar')">AR</button>
+</div>
+
+<!-- ===================== LOGIN PAGE ===================== -->
+<div id="loginPage" class="page active">
+  <div class="login-orb2"></div>
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="icon">🏛️</div>
+      <h1 id="ll-title">MINISTRY OF EDUCATION</h1>
+      <div class="en-sub" id="ll-sub">NATIONAL SCHOOL PORTAL</div>
+      <div class="ar-sub" id="ll-arsub">وزارة التعليم · البوابة الوطنية للمدارس</div>
+    </div>
+    <div class="login-card">
+      <div class="role-toggle">
+        <button class="role-btn active" onclick="switchRole('ministry')" id="rb-ministry">🏛️ Ministry</button>
+        <button class="role-btn" onclick="switchRole('school')" id="rb-school">🏫 School</button>
+      </div>
+      <div id="loginError" class="login-error"></div>
+      <div class="form-group" id="userGroup" style="display:none">
+        <label id="userLabel">SCHOOL USERNAME</label>
+        <input type="text" id="loginUser" placeholder="Enter your school username" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label id="passLabel">PASSWORD</label>
+        <input type="password" id="loginPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">SIGN IN →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MINISTRY APP ===================== -->
+<div id="ministryApp" class="page">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="s-icon">🏛️</div>
+        <div class="s-title" id="min-sidebar-t1">MINISTRY OF</div>
+        <div class="s-title" id="min-sidebar-t2">EDUCATION</div>
+        <div class="s-sub" id="min-sidebar-sub">ADMIN PORTAL</div>
+      </div>
+      <nav class="sidebar-nav" id="minNav">
+        <button class="nav-btn active-m" onclick="showMinSection('overview',this)" data-key="overview">📊 <span data-t="nav_overview">Overview</span></button>
+        <button class="nav-btn" onclick="showMinSection('schools',this)" data-key="schools">🏫 <span data-t="nav_schools">All Schools</span></button>
+        <button class="nav-btn" onclick="showMinSection('performance',this)" data-key="performance">📈 <span data-t="nav_performance">Performance</span></button>
+        <button class="nav-btn" onclick="showMinSection('attendance',this)" data-key="attendance">📋 <span data-t="nav_attendance">Attendance</span></button>
+        <button class="nav-btn" onclick="showMinSection('finance',this)" data-key="finance">💰 <span data-t="nav_finance">Finance</span></button>
+        <button class="nav-btn" onclick="showMinSection('students',this)" data-key="students">👨‍🎓 <span data-t="nav_students">Students</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="add-btn" onclick="openAddSchool()">➕ <span data-t="add_school">Add School</span></button>
+        <div style="font-size:10px;color:#334155;letter-spacing:1px;text-transform:uppercase;padding:8px 14px 4px;font-weight:600">📥 Download Reports</div>
+        <button class="add-btn" style="border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.08);color:#c4b5fd;margin-bottom:4px" onclick="downloadPDF('students')">📋 Students PDF</button>
+        <button class="add-btn" style="border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.08);color:#6ee7b7;margin-bottom:4px" onclick="downloadPDF('attendance')">📊 Attendance PDF</button>
+        <button class="add-btn" style="border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#93c5fd;margin-bottom:4px" onclick="downloadPDF('exams')">📄 Exams PDF</button>
+        <button class="add-btn" style="border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#fcd34d;margin-bottom:8px" onclick="downloadPDF('finance')">💰 Finance PDF</button>
+        <button class="logout-btn" onclick="logout()">🚪 <span data-t="sign_out">Sign Out</span></button>
+      </div>
+    </div>
+    <div class="main-content" id="ministryMain"></div>
+  </div>
+</div>
+
+<!-- ===================== SCHOOL APP ===================== -->
+<div id="schoolApp" class="page">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="s-icon">🏫</div>
+        <div class="s-title" id="sidebarSchoolName" style="font-size:11px;letter-spacing:1px;"></div>
+        <div class="s-sub" data-t="school_admin">SCHOOL ADMIN</div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active-s" onclick="showSchSection('dashboard',this)">📊 <span data-t="nav_dashboard">Dashboard</span></button>
+        <button class="nav-btn" onclick="showSchSection('students',this)">👨‍🎓 <span data-t="nav_students">Students</span></button>
+        <button class="nav-btn" onclick="showSchSection('attendance',this)">📋 <span data-t="nav_attendance">Attendance</span></button>
+        <button class="nav-btn" onclick="showSchSection('results',this)">📄 <span data-t="nav_results">Exam Results</span></button>
+        <button class="nav-btn" onclick="showSchSection('finance',this)">💰 <span data-t="nav_fees">Fees</span></button>
+        <button class="nav-btn" onclick="showSchSection('announcements',this)">📢 <span data-t="nav_announce">Announcements</span></button>
+        <button class="nav-btn" onclick="showSchSection('profile',this)">🏫 <span data-t="nav_profile">School Profile</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">🚪 <span data-t="sign_out">Sign Out</span></button>
+      </div>
+    </div>
+    <div class="main-content" id="schoolMain"></div>
+  </div>
+</div>
+
+<!-- ===================== ADD SCHOOL MODAL ===================== -->
+<div class="modal-overlay" id="addSchoolModal">
+  <div class="modal" style="background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:36px;width:520px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <h2 data-t="add_school_title">Add New School</h2>
+      <button class="close-btn" onclick="closeAddSchool()">×</button>
+    </div>
+    <div id="addSchoolError" style="color:#f87171;font-size:13px;text-align:center;margin-bottom:12px;display:none;"></div>
+    <div class="mform-grid">
+      <div class="mform-group"><label data-t="f_school_name">SCHOOL NAME</label><input type="text" id="as_name" placeholder="Full school name"/></div>
+      <div class="mform-group"><label data-t="f_principal">PRINCIPAL NAME</label><input type="text" id="as_principal" placeholder="Principal full name"/></div>
+      <div class="mform-group"><label>EMAIL</label><input type="email" id="as_email" placeholder="school@edu.gov"/></div>
+      <div class="mform-group"><label data-t="f_phone">PHONE</label><input type="text" id="as_phone" placeholder="+966 ..."/></div>
+      <div class="mform-group"><label data-t="f_founded">YEAR FOUNDED</label><input type="number" id="as_founded" placeholder="2024"/></div>
+      <div class="mform-group"><label data-t="f_region">REGION</label>
+        <select id="as_region"><option>Capital</option><option>Northern</option><option>Southern</option><option>Eastern</option><option>Western</option></select>
+      </div>
+      <div class="mform-group"><label data-t="f_type">TYPE</label>
+        <select id="as_type"><option>Public</option><option>Private</option></select>
+      </div>
+      <div class="mform-group"><label data-t="f_username">SCHOOL USERNAME</label><input type="text" id="as_username" placeholder="Login username" autocomplete="off"/></div>
+      <div class="mform-group"><label data-t="f_password">SCHOOL PASSWORD</label><input type="password" id="as_password" placeholder="Set a password"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddSchool()" data-t="cancel">Cancel</button>
+      <button class="btn-primary" onclick="addSchool()">➕ <span data-t="add_school">Add School</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── TRANSLATIONS ──────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    nav_overview:'Overview', nav_schools:'All Schools', nav_performance:'Performance',
+    nav_attendance:'Attendance', nav_finance:'Finance', nav_students:'Students',
+    nav_dashboard:'Dashboard', nav_results:'Exam Results', nav_fees:'Fees',
+    nav_announce:'Announcements', nav_profile:'School Profile',
+    add_school:'Add School', sign_out:'Sign Out', cancel:'Cancel',
+    school_admin:'SCHOOL ADMIN', add_school_title:'Add New School',
+    f_school_name:'SCHOOL NAME', f_principal:'PRINCIPAL NAME', f_phone:'PHONE',
+    f_founded:'YEAR FOUNDED', f_region:'REGION', f_type:'TYPE',
+    f_username:'SCHOOL USERNAME', f_password:'SCHOOL PASSWORD',
+    login_pass_ministry:'MINISTRY PASSWORD', login_pass_school:'SCHOOL PASSWORD',
+    login_user_school:'SCHOOL USERNAME', login_btn:'SIGN IN →',
+    rb_ministry:'🏛️ Ministry', rb_school:'🏫 School',
+    err_pass:'Please enter the password.', err_invalid_pass:'Invalid password.',
+    err_fields:'Please enter username and password.',
+    err_not_found:'School username not found.', err_wrong_pass:'Incorrect password.',
+    // Section titles
+    t_dashboard:'Dashboard', t_overview:'Ministry Dashboard', t_schools:'All Schools',
+    t_performance:'Performance Analysis', t_attendance:'Attendance Overview',
+    t_finance:'Financial Overview', t_students:'Students by School',
+    t_perf_sub:'12-month trends across all schools',
+    t_att_sub:'Monthly attendance across all schools',
+    t_fin_sub:'Nationwide fee collection status',
+    t_stu_sub:'Student records organized by school',
+    t_total_schools:'Total Schools', t_total_students:'Total Students',
+    t_teachers:'Teachers', t_avg_att:'Avg Attendance', t_avg_perf:'Avg Performance',
+    t_fees_coll:'Fees Collected', t_schools_glance:'SCHOOLS AT A GLANCE',
+    t_students_enrolled:'students enrolled', t_lowest:'Lowest',t_highest:'Highest',
+    t_school:'School', t_region:'Region', t_type:'Type',
+    t_attendance:'Attendance', t_performance:'Performance', t_fees:'Fees Paid',
+    t_total_fees_due:'Total Fees Due', t_total_coll:'Total Collected', t_total_pend:'Total Pending',
+    t_total_fees:'TOTAL FEES',t_collected:'COLLECTED',t_pending:'PENDING',t_coll_rate:'COLLECTION RATE',
+    t_name:'NAME',t_grade:'GRADE',t_avg:'AVG SCORE',t_school_col:'SCHOOL',t_status:'STATUS',
+    t_back:'← Back to Schools', t_region_region:'Region', t_est:'Est.',t_principal:'Principal',
+    t_info:'Info',t_students_tab:'Students',t_results:'Results',
+    t_12m_trend:'12-MONTH TREND', t_subjects:'SUBJECTS',
+    t_avg_att_lbl:'Average Attendance', t_fee_coll_rate:'COLLECTION RATE',
+    t_ann_new:'+ New Announcement', t_ann_title_ph:'Title', t_ann_date_ph:'Date (e.g. 2025-04-01)',
+    t_ann_body_ph:'Announcement body...', t_ann_post:'Post',
+    t_add_student:'+ Add Student', t_full_name:'Full Name', t_grade_ph:'Grade (e.g. 10A)',
+    t_save:'Save',t_ann_new_label:'New Announcement', t_new_student:'New Student',
+    t_exam_name:'Exam Name', t_date_ph:'Date (e.g. Jun 2025)',
+    t_avg_ph:'Average %', t_top_ph:'Top Score %', t_pass_ph:'Pass Rate %',
+    t_add_result:'+ Add Results', t_new_result:'New Exam Results',
+    t_subj_perf:'SUBJECT PERFORMANCE', t_avg_score:'Average Score',
+    t_top_score:'Top Score', t_pass_rate:'Pass Rate',
+    t_fee_mgmt:'Fee Management', t_fee_sub:'School fee collection status',
+    t_total_fees_lbl:'Total Fees',t_collected_lbl:'Collected',t_pending_lbl:'Pending',
+    t_sch_profile:'School Profile', t_update_info:'Update your school information',
+    t_sch_name_lbl:'SCHOOL NAME', t_sch_id_lbl:'SCHOOL ID',
+    t_save_changes:'Save Changes', t_saved:'✓ Saved!',
+    t_recent_ann:'RECENT ANNOUNCEMENTS', t_monthly_att:'MONTHLY ATTENDANCE',
+    t_monthly_perf:'MONTHLY PERFORMANCE', t_annual_avg:'Annual Average',
+    t_best_month:'Best Month', t_lowest_month:'Lowest Month', t_above90:'Above 90%',
+    t_months_lbl:'months', t_att_records:'Attendance Records',
+    t_monthly_tracking:'Monthly attendance tracking', t_monthly_att_rate:'MONTHLY ATTENDANCE RATE',
+    t_exam_results:'Exam Results', t_back_schools:'← Back to Schools',
+    t_students_overview:'Students Overview', t_no_students:'No student records for this school.',
+    t_12m_perf:'12-month performance', t_pass:'pass rate',
+    t_no_ann:'No announcements yet.',t_no_results:'No results recorded yet.',
+    t_no_students_yet:'No students added yet.',
+    t_student_teacher:'Student-Teacher Ratio', t_school_id:'School ID',
+    t_founded:'Founded', t_students_count:'Students', t_teachers_count:'Teachers',
+    t_total_records:'total records across', t_schools_count:'schools',
+  },
+  ar: {
+    nav_overview:'نظرة عامة', nav_schools:'جميع المدارس', nav_performance:'الأداء',
+    nav_attendance:'الحضور', nav_finance:'المالية', nav_students:'الطلاب',
+    nav_dashboard:'لوحة التحكم', nav_results:'نتائج الامتحانات', nav_fees:'الرسوم',
+    nav_announce:'الإعلانات', nav_profile:'ملف المدرسة',
+    add_school:'إضافة مدرسة', sign_out:'تسجيل الخروج', cancel:'إلغاء',
+    school_admin:'إدارة المدرسة', add_school_title:'إضافة مدرسة جديدة',
+    f_school_name:'اسم المدرسة', f_principal:'اسم المدير', f_phone:'الهاتف',
+    f_founded:'سنة التأسيس', f_region:'المنطقة', f_type:'النوع',
+    f_username:'اسم المستخدم', f_password:'كلمة المرور',
+    login_pass_ministry:'كلمة مرور الوزارة', login_pass_school:'كلمة مرور المدرسة',
+    login_user_school:'اسم مستخدم المدرسة', login_btn:'تسجيل الدخول ←',
+    rb_ministry:'🏛️ الوزارة', rb_school:'🏫 المدرسة',
+    err_pass:'يرجى إدخال كلمة المرور.', err_invalid_pass:'كلمة المرور غير صحيحة.',
+    err_fields:'يرجى إدخال اسم المستخدم وكلمة المرور.',
+    err_not_found:'اسم مستخدم المدرسة غير موجود.', err_wrong_pass:'كلمة المرور خاطئة.',
+    t_dashboard:'لوحة التحكم', t_overview:'لوحة تحكم الوزارة', t_schools:'جميع المدارس',
+    t_performance:'تحليل الأداء', t_attendance:'نظرة عامة على الحضور',
+    t_finance:'النظرة المالية العامة', t_students:'الطلاب حسب المدرسة',
+    t_perf_sub:'اتجاهات 12 شهرًا عبر جميع المدارس',
+    t_att_sub:'الحضور الشهري عبر جميع المدارس',
+    t_fin_sub:'حالة تحصيل الرسوم على مستوى الدولة',
+    t_stu_sub:'سجلات الطلاب منظمة حسب المدرسة',
+    t_total_schools:'إجمالي المدارس', t_total_students:'إجمالي الطلاب',
+    t_teachers:'المعلمون', t_avg_att:'متوسط الحضور', t_avg_perf:'متوسط الأداء',
+    t_fees_coll:'الرسوم المحصلة', t_schools_glance:'لمحة عن المدارس',
+    t_students_enrolled:'طلاب مسجلون', t_lowest:'الأدنى',t_highest:'الأعلى',
+    t_school:'المدرسة', t_region:'المنطقة', t_type:'النوع',
+    t_attendance:'الحضور', t_performance:'الأداء', t_fees:'الرسوم المدفوعة',
+    t_total_fees_due:'إجمالي الرسوم المستحقة', t_total_coll:'إجمالي المحصل', t_total_pend:'إجمالي المتبقي',
+    t_total_fees:'إجمالي الرسوم',t_collected:'المحصل',t_pending:'المعلق',t_coll_rate:'معدل التحصيل',
+    t_name:'الاسم',t_grade:'الصف',t_avg:'متوسط الدرجة',t_school_col:'المدرسة',t_status:'الحالة',
+    t_back:'← العودة للمدارس', t_region_region:'المنطقة', t_est:'تأسست.',t_principal:'المدير',
+    t_info:'معلومات',t_students_tab:'الطلاب',t_results:'النتائج',
+    t_12m_trend:'اتجاه 12 شهر', t_subjects:'المواد',
+    t_avg_att_lbl:'متوسط الحضور', t_fee_coll_rate:'معدل التحصيل',
+    t_ann_new:'+ إعلان جديد', t_ann_title_ph:'العنوان', t_ann_date_ph:'التاريخ',
+    t_ann_body_ph:'نص الإعلان...', t_ann_post:'نشر',
+    t_add_student:'+ إضافة طالب', t_full_name:'الاسم الكامل', t_grade_ph:'الصف',
+    t_save:'حفظ',t_ann_new_label:'إعلان جديد', t_new_student:'طالب جديد',
+    t_exam_name:'اسم الامتحان', t_date_ph:'التاريخ',
+    t_avg_ph:'متوسط %', t_top_ph:'أعلى درجة %', t_pass_ph:'معدل النجاح %',
+    t_add_result:'+ إضافة نتائج', t_new_result:'نتائج امتحان جديد',
+    t_subj_perf:'أداء المواد', t_avg_score:'متوسط الدرجة',
+    t_top_score:'أعلى درجة', t_pass_rate:'معدل النجاح',
+    t_fee_mgmt:'إدارة الرسوم', t_fee_sub:'حالة تحصيل رسوم المدرسة',
+    t_total_fees_lbl:'إجمالي الرسوم',t_collected_lbl:'المحصل',t_pending_lbl:'المعلق',
+    t_sch_profile:'ملف المدرسة', t_update_info:'تحديث معلومات مدرستك',
+    t_sch_name_lbl:'اسم المدرسة', t_sch_id_lbl:'معرّف المدرسة',
+    t_save_changes:'حفظ التغييرات', t_saved:'✓ تم الحفظ!',
+    t_recent_ann:'الإعلانات الأخيرة', t_monthly_att:'الحضور الشهري',
+    t_monthly_perf:'الأداء الشهري', t_annual_avg:'المتوسط السنوي',
+    t_best_month:'أفضل شهر', t_lowest_month:'أدنى شهر', t_above90:'فوق 90%',
+    t_months_lbl:'أشهر', t_att_records:'سجلات الحضور',
+    t_monthly_tracking:'تتبع الحضور الشهري', t_monthly_att_rate:'معدل الحضور الشهري',
+    t_exam_results:'نتائج الامتحانات', t_back_schools:'← العودة للمدارس',
+    t_students_overview:'نظرة عامة على الطلاب', t_no_students:'لا توجد سجلات طلاب لهذه المدرسة.',
+    t_12m_perf:'أداء 12 شهر', t_pass:'معدل النجاح',
+    t_no_ann:'لا توجد إعلانات بعد.',t_no_results:'لم يتم تسجيل نتائج بعد.',
+    t_no_students_yet:'لم يتم إضافة طلاب بعد.',
+    t_student_teacher:'نسبة الطلاب للمعلمين', t_school_id:'معرّف المدرسة',
+    t_founded:'تأسست', t_students_count:'الطلاب', t_teachers_count:'المعلمون',
+    t_total_records:'إجمالي السجلات في', t_schools_count:'مدارس',
+  }
+};
+
+let lang = 'en';
+function t(key){ return (T[lang][key] || T['en'][key] || key); }
+
+function setLang(l) {
+  lang = l;
+  const html = document.documentElement;
+  html.setAttribute('lang', l);
+  html.setAttribute('dir', l==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-btn').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&l==='en')||(i===1&&l==='ar'));
+  });
+  // Update all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k = el.getAttribute('data-t');
+    if(T[lang][k]) el.textContent = T[lang][k];
+  });
+  // Rebuild active section
+  if(document.getElementById('ministryApp').classList.contains('active')) {
+    renderMinistry(currentMinSection);
+  } else if(document.getElementById('schoolApp').classList.contains('active')) {
+    renderSchool(currentSchSection);
+  }
+  updateLoginLabels();
+}
+
+function updateLoginLabels() {
+  document.getElementById('rb-ministry').textContent = t('rb_ministry');
+  document.getElementById('rb-school').textContent = t('rb_school');
+  document.getElementById('loginBtn').textContent = t('login_btn');
+  document.getElementById('passLabel').textContent =
+    currentRole==='ministry' ? t('login_pass_ministry') : t('login_pass_school');
+  if(currentRole==='school') document.getElementById('userLabel').textContent = t('login_user_school');
+  document.getElementById('loginError').style.display='none';
+}
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+function getMonths(){ return lang==='ar' ? MONTHS_AR : MONTHS; }
+
+// ─── STUDENTS DATA ─────────────────────────────────────────────────────────────
+function makeStudents(grade, names, baseAvg, baseAtt) {
+  return names.map((name,i)=>{
+    const av = Math.min(100, Math.max(50, baseAvg + Math.floor(Math.random()*20)-10));
+    const at = Math.min(100, Math.max(65, baseAtt + Math.floor(Math.random()*16)-8));
+    const status = av>=90?'Excellent':av>=80?'Very Good':av>=65?'Good':'Needs Support';
+    return {id:i+1+grade.charCodeAt(0)*100, name, grade, avg:av, attendance:at, status};
+  });
+}
+
+const sch001Students = [
+  ...makeStudents('9A',  ['Sara Al-Rashid','Omar Khalil','Fatima Al-Zahra','Yousef Al-Amin','Nadia Hassan','Ahmad Suleiman','Layla Mansour','Khaled Al-Farsi','Mariam Nasser','Tariq Ibrahim'], 80, 90),
+  ...makeStudents('10B', ['Reema Al-Ghamdi','Bilal Qasim','Hessa Al-Otaibi','Saleh Mustafa','Dana Al-Zahrani','Faisal Jaber','Noura Al-Shehri','Rayan Al-Dosari','Maha Saeed','Abdullah Al-Harbi'], 76, 87),
+  ...makeStudents('11C', ['Lujain Al-Rashidi','Anas Barakah','Wafa Al-Shamri','Nawaf Al-Mutairi','Rima Khalid','Bader Al-Anazi','Shahad Turki','Hamad Al-Subaie','Amira Fahad','Yazid Al-Qahtani'], 82, 92),
+];
+const sch002Students = [
+  ...makeStudents('10A', ['Lena Morsi','Adam Faris','Maya Al-Sayed','Khalid Nasser','Sophie Karim','Rami Aziz','Dana Hakim','Tarek Bourji','Nour Al-Din','Laila Haddad'], 90, 96),
+  ...makeStudents('11B', ['Zara Mansouri','Ivan Petrov','Elena Yousef','Ahmed Kassem','Sandra Michel','Yusuf Blanco','Riva Goldstein','Chen Wei','Priya Nair','Marco Ricci'], 88, 94),
+  ...makeStudents('12C', ['Hana Bashir','Samir Touma','Alia Mousa','Patrick Lahoud','Nadia Srour','George Khoury','Lynn Chamoun','Firas Nassar','Rania Aoun','Elie Frem'], 92, 97),
+];
+const sch003Students = [
+  ...makeStudents('8A',  ['Hana Salim','Zaid Al-Hakim','Reem Othman','Salma Al-Dosari','Hassan Al-Ghamdi','Fatma Yahya','Abdulaziz Al-Shri','Ghada Marzouq','Walid Badr','Najla Al-Qahtani'], 68, 80),
+  ...makeStudents('9B',  ['Amal Turki','Sami Hussain','Rawan Al-Zahrani','Nabil Farhan','Lana Khoury','Tariq Masri','Hind Al-Harbi','Ramzi Nassar','Dina Sawan','Umar Hilal'], 65, 77),
+  ...makeStudents('10C', ['Mona Al-Otaibi','Khalil Ibrahim','Sahar Jaber','Osama Al-Anazi','Randa Saleem','Yasser Noor','Inas Al-Mutairi','Bassem Al-Harbi','Suhair Fahad','Adel Al-Qahtani'], 71, 83),
+];
+
+const defaultSchools = [
+  {
+    id:"sch-001", name:"Al-Nour National School", region:"Capital", type:"Public",
+    principal:"Dr. Ahmed Hassan", founded:2005, email:"alnour@edu.gov", phone:"+966 11 234 5678",
+    username:"alnour", password:"school123",
+    students:1240, teachers:68,
+    attendance:[88,91,85,93,89,92,87,94,90,88,91,86],
+    performance:[72,75,78,80,77,82,79,84,81,83,85,82],
+    fees:{total:1240000,collected:1054000,pending:186000},
+    subjects:[{name:"Mathematics",avg:78,pass:91},{name:"Science",avg:82,pass:94},{name:"Arabic",avg:85,pass:96},{name:"English",avg:74,pass:88},{name:"History",avg:80,pass:93}],
+    recentResults:[{exam:"Midterm 2025",avg:79,top:98,pass:91,date:"Mar 2025"},{exam:"Final 2024",avg:81,top:99,pass:93,date:"Jun 2024"},{exam:"Midterm 2024",avg:76,top:97,pass:89,date:"Mar 2024"}],
+    students_list: sch001Students,
+    announcements:[{id:1,title:"Parent-Teacher Meeting",date:"2025-03-15",body:"Scheduled for all grades this Friday."},{id:2,title:"Science Fair",date:"2025-03-20",body:"Annual science fair registration open."}]
+  },
+  {
+    id:"sch-002", name:"Future International Academy", region:"Northern", type:"Private",
+    principal:"Ms. Rania Saleh", founded:2010, email:"future@edu.gov", phone:"+966 11 876 5432",
+    username:"future", password:"school456",
+    students:870, teachers:54,
+    attendance:[92,94,91,95,93,96,94,97,95,93,96,94],
+    performance:[84,86,88,87,89,91,88,92,90,93,91,94],
+    fees:{total:1740000,collected:1670400,pending:69600},
+    subjects:[{name:"Mathematics",avg:88,pass:96},{name:"Science",avg:91,pass:98},{name:"Arabic",avg:86,pass:95},{name:"English",avg:90,pass:97},{name:"History",avg:85,pass:94}],
+    recentResults:[{exam:"Midterm 2025",avg:89,top:100,pass:96,date:"Mar 2025"},{exam:"Final 2024",avg:91,top:100,pass:97,date:"Jun 2024"},{exam:"Midterm 2024",avg:87,top:99,pass:95,date:"Mar 2024"}],
+    students_list: sch002Students,
+    announcements:[{id:1,title:"Cambridge Exams",date:"2025-04-10",body:"Cambridge IGCSE registration deadline approaching."}]
+  },
+  {
+    id:"sch-003", name:"Al-Salam Community School", region:"Southern", type:"Public",
+    principal:"Mr. Tariq Issa", founded:1998, email:"alsalam@edu.gov", phone:"+966 11 345 6789",
+    username:"alsalam", password:"school789",
+    students:2100, teachers:112,
+    attendance:[79,82,77,84,80,83,78,85,81,79,83,80],
+    performance:[65,68,70,67,72,70,73,71,74,73,75,72],
+    fees:{total:2100000,collected:1512000,pending:588000},
+    subjects:[{name:"Mathematics",avg:66,pass:79},{name:"Science",avg:70,pass:83},{name:"Arabic",avg:74,pass:87},{name:"English",avg:63,pass:76},{name:"History",avg:71,pass:84}],
+    recentResults:[{exam:"Midterm 2025",avg:69,top:95,pass:81,date:"Mar 2025"},{exam:"Final 2024",avg:71,top:96,pass:83,date:"Jun 2024"},{exam:"Midterm 2024",avg:67,top:94,pass:79,date:"Mar 2024"}],
+    students_list: sch003Students,
+    announcements:[{id:1,title:"Remedial Classes",date:"2025-03-10",body:"Free tutoring available for struggling students."}]
+  }
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+let schools = defaultSchools.map(s=>({...s, students_list:[...s.students_list], announcements:[...s.announcements], recentResults:[...s.recentResults]}));
+let currentRole = 'ministry';
+let activeSchoolId = null;
+let currentMinSection = 'overview';
+let currentSchSection = 'dashboard';
+let detailSchoolId = null;
+let detailSubTab = 'info';
+
+function saveSchools() { /* data lives in memory only */ }
+function getSchool(id) { return schools.find(s => s.id === id); }
+function avg(arr) { return Math.round(arr.reduce((a,b)=>a+b,0)/arr.length); }
+function fmt(n) { return Number(n).toLocaleString(); }
+function pct(a,b) { return b===0?0:Math.round((a/b)*100); }
+function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const statusColors = {"Excellent":"#10b981","Very Good":"#3b82f6","Good":"#f59e0b","Needs Support":"#ef4444"};
+const statusAr = {"Excellent":"ممتاز","Very Good":"جيد جداً","Good":"جيد","Needs Support":"يحتاج دعم"};
+function statusLabel(s){ return lang==='ar'?(statusAr[s]||s):s; }
+function statusBadge(s) {
+  const c = statusColors[s] || '#6b7280';
+  return `<span class="status-badge" style="background:${c}22;color:${c}">${esc(statusLabel(s))}</span>`;
+}
+function perfColor(v) { return v>=90?'#10b981':v>=75?'#3b82f6':v>=60?'#f59e0b':'#ef4444'; }
+
+// ─── CHARTS ───────────────────────────────────────────────────────────────────
+function sparkHtml(data, color, height=80) {
+  const max=Math.max(...data), min=Math.min(...data), range=max-min||1;
+  const M = getMonths();
+  const bars = data.map((v,i)=>{
+    const h = ((v-min)/range)*70+30;
+    const op = 0.7+(i/data.length)*0.3;
+    return `<div class="spark-bar" style="height:${h}%;background:${color};opacity:${op}" title="${M[i]}: ${v}%"></div>`;
+  }).join('');
+  return `<div class="spark" style="height:${height}px">${bars}</div>`;
+}
+function monthLabels(step=3) {
+  const M = getMonths();
+  return `<div class="month-labels">${M.map((m,i)=>i%step===0?`<span>${m}</span>`:'').filter(Boolean).join('')}</div>`;
+}
+function donutSvg(p, color, size=80) {
+  const r=34, circ=2*Math.PI*r, dash=(p/100)*circ;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 80 80" class="donut">
+    <circle cx="40" cy="40" r="${r}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/>
+    <circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+      stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+    <text x="40" y="44" text-anchor="middle" fill="white" font-size="14" font-weight="700" transform="rotate(90 40 40)">${p}%</text>
+  </svg>`;
+}
+function progBar(val, color, height=6) {
+  return `<div style="height:${height}px;background:rgba(255,255,255,.05);border-radius:${height/2}px;overflow:hidden;">
+    <div style="height:100%;width:${val}%;background:${color};border-radius:${height/2}px;animation:progGrow .8s cubic-bezier(.4,0,.2,1) both;"></div></div>`;
+}
+
+// ─── CONTENT ANIMATION HELPER ─────────────────────────────────────────────────
+function animateContent(el) {
+  el.classList.remove('content-animate');
+  void el.offsetWidth;
+  el.classList.add('content-animate');
+}
+
+// ─── LOGIN ─────────────────────────────────────────────────────────────────────
+function switchRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0&&role==='ministry')||(i===1&&role==='school'));
+  });
+  const userGroup = document.getElementById('userGroup');
+  if(role==='ministry') {
+    userGroup.style.display='none';
+    document.getElementById('passLabel').textContent = t('login_pass_ministry');
+  } else {
+    userGroup.style.display='block';
+    userGroup.style.animation='contentIn .3s ease both';
+    document.getElementById('userLabel').textContent = t('login_user_school');
+    document.getElementById('passLabel').textContent = t('login_pass_school');
+  }
+  document.getElementById('loginPass').placeholder = '••••••••';
+  document.getElementById('loginError').style.display='none';
+}
+
+function doLogin() {
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display='none';
+
+  if(currentRole==='ministry') {
+    if(!pass){ errEl.textContent=t('err_pass'); errEl.style.display='block'; errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s ease'; return; }
+    if(pass==='edu2025') {
+      transitionToPage('loginPage','ministryApp');
+      renderMinistry('overview');
+    } else {
+      errEl.textContent=t('err_invalid_pass'); errEl.style.display='block'; errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s ease';
+    }
+  } else {
+    const user = document.getElementById('loginUser').value.trim();
+    if(!user||!pass){ errEl.textContent=t('err_fields'); errEl.style.display='block'; errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s ease'; return; }
+    const school = schools.find(s=>s.username===user);
+    if(!school){ errEl.textContent=t('err_not_found'); errEl.style.display='block'; errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s ease'; return; }
+    if(school.password!==pass){ errEl.textContent=t('err_wrong_pass'); errEl.style.display='block'; errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s ease'; return; }
+    activeSchoolId = school.id;
+    document.getElementById('sidebarSchoolName').textContent = school.name;
+    transitionToPage('loginPage','schoolApp');
+    renderSchool('dashboard');
+  }
+}
+
+function transitionToPage(fromId, toId) {
+  switchActivePage(toId);
+}
+
+function switchActivePage(toId) {
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+  });
+  const to = document.getElementById(toId);
+  // Force reflow so animation replays
+  to.classList.add('active');
+}
+
+function logout() {
+  activeSchoolId = null;
+  detailSchoolId = null;
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  switchRole('ministry');
+  switchActivePage('loginPage');
+}
+
+function showPage(id) { switchActivePage(id); }
+function hidePage(id) { document.getElementById(id).classList.remove('active'); }
+
+// ─── MINISTRY NAV ──────────────────────────────────────────────────────────────
+function showMinSection(sec, btn) {
+  detailSchoolId = null; currentMinSection = sec;
+  document.querySelectorAll('#minNav .nav-btn').forEach(b=>b.classList.remove('active-m'));
+  if(btn) btn.classList.add('active-m');
+  renderMinistry(sec);
+}
+
+function renderMinistry(sec) {
+  const el = document.getElementById('ministryMain');
+  if(detailSchoolId){ el.innerHTML=renderSchoolDetail(detailSchoolId); animateContent(el); return; }
+  if(sec==='overview') el.innerHTML=renderMinOverview();
+  else if(sec==='schools') el.innerHTML=renderMinSchools();
+  else if(sec==='performance') el.innerHTML=renderMinPerformance();
+  else if(sec==='attendance') el.innerHTML=renderMinAttendance();
+  else if(sec==='finance') el.innerHTML=renderMinFinance();
+  else if(sec==='students') el.innerHTML=renderMinStudents();
+  animateContent(el);
+}
+
+// ─── MINISTRY OVERVIEW ─────────────────────────────────────────────────────────
+function renderMinOverview() {
+  const ts=schools.reduce((a,s)=>a+s.students,0), tt=schools.reduce((a,s)=>a+s.teachers,0);
+  const aa=Math.round(schools.reduce((a,s)=>a+avg(s.attendance),0)/schools.length);
+  const ap=Math.round(schools.reduce((a,s)=>a+avg(s.performance),0)/schools.length);
+  const tf=schools.reduce((a,s)=>a+s.fees.total,0), tc=schools.reduce((a,s)=>a+s.fees.collected,0);
+  const cards=[
+    {label:t('t_total_schools'),val:schools.length,icon:"🏫",c:"#3b82f6"},
+    {label:t('t_total_students'),val:fmt(ts),icon:"👨‍🎓",c:"#10b981"},
+    {label:t('t_teachers'),val:fmt(tt),icon:"👩‍🏫",c:"#f59e0b"},
+    {label:t('t_avg_att'),val:aa+"%",icon:"📋",c:"#8b5cf6"},
+    {label:t('t_avg_perf'),val:ap+"%",icon:"📈",c:"#06b6d4"},
+    {label:t('t_fees_coll'),val:pct(tc,tf)+"%",icon:"💰",c:"#ec4899"},
+  ];
+  const schoolCards=schools.map(s=>{
+    const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+    return `<div class="school-card" onclick="openSchoolDetail('${esc(s.id)}')">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+        <div><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(s.name)}</div>
+          <div style="font-size:12px;color:#64748b">${esc(s.region)} · ${esc(s.type)} · ${fmt(s.students)} ${lang==='ar'?'طلاب':'students'}</div>
+        </div>
+        <span class="tag ${s.type==='Private'?'tag-private':'tag-public'}">${esc(s.type)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        ${[{l:t('t_attendance'),v:att,c:"#10b981"},{l:t('t_performance'),v:perf,c:"#3b82f6"},{l:t('t_fees'),v:fr,c:"#f59e0b"}].map(m=>`
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:${m.c}">${m.v}%</div>
+          <div style="font-size:10px;color:#475569;letter-spacing:1px">${m.l.toUpperCase()}</div>
+          ${progBar(m.v,m.c,4)}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="page-title">${t('t_overview')}</div>
+    <div class="page-sub">${new Date().toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:32px">
+      ${cards.map((c,i)=>`<div class="stat-card stagger-${i+1}" style="animation:contentIn .5s ease both ${i*0.07}s">
+        <div class="bg-icon">${c.icon}</div>
+        <div style="font-size:26px;margin-bottom:8px">${c.icon}</div>
+        <div class="stat-val" style="color:${c.c}">${c.val}</div>
+        <div class="stat-label">${c.label}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:13px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_schools_glance')}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px">${schoolCards}</div>`;
+}
+
+// ─── MINISTRY SCHOOLS ──────────────────────────────────────────────────────────
+function renderMinSchools() {
+  const rows=schools.map(s=>{
+    const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+    return `<tr onclick="openSchoolDetail('${esc(s.id)}')" style="cursor:pointer" class="trow-anim">
+      <td><div style="font-weight:600">${esc(s.name)}</div><div style="font-size:11px;color:#64748b">${esc(s.id)}</div></td>
+      <td>${esc(s.region)}</td>
+      <td><span class="tag ${s.type==='Private'?'tag-private':'tag-public'}">${esc(s.type)}</span></td>
+      <td>${fmt(s.students)}</td>
+      <td style="color:#10b981;font-weight:700">${att}%</td>
+      <td style="color:#3b82f6;font-weight:700">${perf}%</td>
+      <td style="color:${fr>90?'#10b981':'#f59e0b'};font-weight:700">${fr}%</td>
+      <td style="color:#64748b;font-size:18px">›</td>
+    </tr>`;
+  }).join('');
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div class="page-title" style="margin-bottom:0">${t('t_schools')}</div>
+    <input placeholder="${lang==='ar'?'بحث...':'Search...'}" oninput="filterSchoolsTable(this.value)" style="padding:10px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:14px;font-family:Georgia,serif;width:220px;transition:border .22s;" onfocus="this.style.borderColor='rgba(59,130,246,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+  </div>
+  <table id="schoolsTable">
+    <thead><tr><th>${t('t_school')}</th><th>${t('t_region')}</th><th>${t('t_type')}</th><th>${lang==='ar'?'الطلاب':'STUDENTS'}</th><th>${t('t_attendance')}</th><th>${t('t_performance')}</th><th>${t('t_fees')}</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+function filterSchoolsTable(q) {
+  document.querySelectorAll('#schoolsTable tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+}
+
+// ─── SCHOOL DETAIL ─────────────────────────────────────────────────────────────
+function openSchoolDetail(id) { detailSchoolId=id; detailSubTab='info'; document.getElementById('ministryMain').innerHTML=renderSchoolDetail(id); animateContent(document.getElementById('ministryMain')); }
+function renderSchoolDetail(id) {
+  const s=getSchool(id); if(!s) return '';
+  const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+  const tabKeys=['info','performance','attendance','finance','students','results'];
+  const tabLabels={'info':t('t_info'),'performance':t('nav_performance'),'attendance':t('nav_attendance'),'finance':t('nav_finance'),'students':t('t_students_tab'),'results':t('t_results')};
+  return `<button class="back-btn" onclick="backFromDetail()">${t('t_back_schools')}</button>
+  <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:24px">
+    <div>
+      <div class="page-title" style="margin-bottom:4px">${esc(s.name)}</div>
+      <div style="color:#64748b;font-size:14px">${esc(s.region)} ${t('t_region_region')} · ${esc(s.type)} · ${t('t_est')} ${s.founded} · ${t('t_principal')}: ${esc(s.principal)}</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      ${donutSvg(att,'#10b981',70)}${donutSvg(perf,'#3b82f6',70)}${donutSvg(fr,'#f59e0b',70)}
+    </div>
+  </div>
+  <div class="tab-bar">${tabKeys.map(tk=>`<button class="tab-pill${tk===detailSubTab?' active':''}" onclick="switchDetailTab('${id}','${tk}')">${tabLabels[tk]}</button>`).join('')}</div>
+  <div id="detailBody">${renderDetailTab(s, detailSubTab)}</div>`;
+}
+function switchDetailTab(id,tab) {
+  detailSubTab=tab;
+  const s=getSchool(id);
+  document.querySelectorAll('.tab-pill').forEach(b=>{b.classList.toggle('active',b.textContent.trim()===tab||b.getAttribute('onclick')?.includes(`'${tab}'`));});
+  document.querySelectorAll('.tab-pill').forEach(b=>{b.classList.remove('active');});
+  document.querySelectorAll('.tab-pill').forEach(b=>{ if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${tab}'`)) b.classList.add('active'); });
+  const db=document.getElementById('detailBody');
+  db.innerHTML=renderDetailTab(s,tab);
+  animateContent(db);
+}
+function renderDetailTab(s,tab) {
+  const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+  const infoFields = [
+    [t('t_school_id'),s.id],[t('t_type'),s.type],[t('t_region'),s.region],
+    [t('t_founded'),s.founded],[t('t_principal'),s.principal],['Email',s.email],
+    [t('f_phone'),s.phone],[t('t_students_count'),fmt(s.students)],
+    [t('t_teachers_count'),fmt(s.teachers)],[t('t_student_teacher'),Math.round(s.students/(s.teachers||1))+':1']
+  ];
+  if(tab==='info') return `<div class="info-grid">${infoFields.map(([l,v])=>`<div class="info-field"><div class="info-field-label">${l.toUpperCase()}</div><div class="info-field-val">${esc(String(v))}</div></div>`).join('')}</div>`;
+  if(tab==='performance') return `<div class="grid-2">
+    <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_12m_trend')}</div>${sparkHtml(s.performance,'#3b82f6',100)}${monthLabels()}</div>
+    <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_subjects')}</div>
+      ${s.subjects.map(sub=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px"><span>${esc(sub.name)}</span><span style="color:#3b82f6;font-weight:700">${sub.avg}%</span></div>${progBar(sub.avg,'#3b82f6',8)}</div>`).join('')}
+    </div></div>`;
+  if(tab==='attendance') return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div><div style="font-size:40px;font-weight:700;color:#10b981">${att}%</div><div style="color:#64748b;font-size:14px">${t('t_avg_att_lbl')}</div></div>
+      ${donutSvg(att,'#10b981',100)}
+    </div>${sparkHtml(s.attendance,'#10b981',120)}
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);margin-top:8px;gap:3px">
+      ${getMonths().map((m,i)=>`<div style="text-align:center"><div style="font-size:9px;color:#475569">${m}</div><div style="font-size:11px;font-weight:700;color:${s.attendance[i]>=90?'#10b981':'#f59e0b'}">${s.attendance[i]}%</div></div>`).join('')}
+    </div></div>`;
+  if(tab==='finance') return `<div class="grid-2">${[{l:t('t_total_fees_lbl'),v:fmt(s.fees.total),c:'#64748b',i:'💼'},{l:t('t_collected_lbl'),v:fmt(s.fees.collected),c:'#10b981',i:'✅'},{l:t('t_pending_lbl'),v:fmt(s.fees.pending),c:'#ef4444',i:'⏳'},{l:t('t_fee_coll_rate'),v:fr+'%',c:'#f59e0b',i:'📊'}].map(c=>`<div class="card"><div style="font-size:28px">${c.i}</div><div style="font-size:28px;font-weight:700;color:${c.c};margin:8px 0 4px">${c.v}</div><div style="color:#64748b;font-size:13px">${c.l}</div></div>`).join('')}</div>`;
+  if(tab==='students') return `<table>
+    <thead><tr><th>${t('t_name')}</th><th>${t('t_grade')}</th><th>${t('t_avg')}</th><th>${t('t_attendance')}</th><th>${t('t_status')}</th></tr></thead>
+    <tbody>${s.students_list.map((st,i)=>`<tr class="trow-anim" style="animation-delay:${i*0.03}s">
+      <td style="font-weight:600">${esc(st.name)}</td><td>${esc(st.grade)}</td>
+      <td style="font-weight:700;color:${perfColor(st.avg)}">${st.avg}%</td>
+      <td>${st.attendance}%</td><td>${statusBadge(st.status)}</td>
+    </tr>`).join('')}</tbody></table>`;
+  if(tab==='results') return s.recentResults.map(r=>`<div class="result-card">
+    <div><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(r.exam)}</div><div style="font-size:12px;color:#64748b">${esc(r.date)}</div></div>
+    ${[{l:t('t_avg_score'),v:r.avg,c:'#3b82f6'},{l:t('t_top_score'),v:r.top,c:'#10b981'},{l:t('t_pass_rate'),v:r.pass,c:'#f59e0b'}].map(m=>`<div class="result-metric"><div class="rv" style="color:${m.c}">${m.v}%</div><div class="rl">${m.l}</div></div>`).join('')}
+  </div>`).join('') || `<p class="empty">${t('t_no_results')}</p>`;
+  return '';
+}
+function backFromDetail() { detailSchoolId=null; renderMinistry(currentMinSection); }
+
+// ─── MINISTRY PERFORMANCE ──────────────────────────────────────────────────────
+function renderMinPerformance() {
+  return `<div class="page-title">${t('t_performance')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_perf_sub')}</div>
+  <div class="grid-2">${schools.map((s,i)=>`<div class="card" style="animation:contentIn .5s ease both ${i*0.12}s">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div><div style="font-weight:700;margin-bottom:2px">${esc(s.name)}</div><div style="font-size:12px;color:#64748b">${t('t_12m_perf')}</div></div>
+      <div style="font-size:28px;font-weight:700;color:#3b82f6">${avg(s.performance)}%</div>
+    </div>
+    ${sparkHtml(s.performance,'#3b82f6',80)}${monthLabels()}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:20px">
+      ${s.subjects.slice(0,3).map(sub=>`<div style="background:rgba(0,0,0,.2);border-radius:10px;padding:12px 14px">
+        <div style="font-size:11px;color:#64748b;margin-bottom:4px">${esc(sub.name)}</div>
+        <div style="font-size:18px;font-weight:700;color:${perfColor(sub.avg)}">${sub.avg}%</div>
+        <div style="font-size:10px;color:#64748b">${sub.pass}% ${t('t_pass')}</div>
+      </div>`).join('')}
+    </div>
+  </div>`).join('')}</div>`;
+}
+
+// ─── MINISTRY ATTENDANCE ───────────────────────────────────────────────────────
+function renderMinAttendance() {
+  return `<div class="page-title">${t('t_attendance')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_att_sub')}</div>
+  <div class="grid-2">${schools.map((s,i)=>`<div class="card" style="animation:contentIn .5s ease both ${i*0.12}s">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div><div style="font-weight:700;margin-bottom:2px">${esc(s.name)}</div><div style="font-size:12px;color:#64748b">${fmt(s.students)} ${t('t_students_enrolled')}</div></div>
+      ${donutSvg(avg(s.attendance),avg(s.attendance)>=90?'#10b981':'#f59e0b')}
+    </div>
+    ${sparkHtml(s.attendance,'#10b981',60)}
+    <div style="display:flex;justify-content:space-between;margin-top:8px">
+      <span style="font-size:11px;color:#475569">${t('t_lowest')}: ${Math.min(...s.attendance)}%</span>
+      <span style="font-size:11px;color:#475569">${t('t_highest')}: ${Math.max(...s.attendance)}%</span>
+    </div>
+  </div>`).join('')}</div>`;
+}
+
+// ─── MINISTRY FINANCE ──────────────────────────────────────────────────────────
+function renderMinFinance() {
+  const total=schools.reduce((a,s)=>a+s.fees.total,0), coll=schools.reduce((a,s)=>a+s.fees.collected,0), pend=schools.reduce((a,s)=>a+s.fees.pending,0);
+  return `<div class="page-title">${t('t_finance')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_fin_sub')}</div>
+  <div class="grid-3" style="margin-bottom:28px">
+    ${[{l:t('t_total_fees_due'),v:fmt(total),c:'#64748b',i:'💼'},{l:t('t_total_coll'),v:fmt(coll),c:'#10b981',i:'✅'},{l:t('t_total_pend'),v:fmt(pend),c:'#ef4444',i:'⏳'}].map((c,i)=>`<div class="card" style="animation:contentIn .5s ease both ${i*0.1}s"><div style="font-size:24px">${c.i}</div><div style="font-size:24px;font-weight:700;color:${c.c};margin:8px 0 4px">${c.v}</div><div style="font-size:12px;color:#64748b">${c.l}</div></div>`).join('')}
+  </div>
+  <table><thead><tr><th>${t('t_school')}</th><th>${t('t_total_fees')}</th><th>${t('t_collected')}</th><th>${t('t_pending')}</th><th>${t('t_coll_rate')}</th></tr></thead>
+  <tbody>${schools.map((s,i)=>{const r=pct(s.fees.collected,s.fees.total);return `<tr class="trow-anim" style="animation-delay:${i*0.08}s">
+    <td>${esc(s.name)}</td><td>${fmt(s.fees.total)}</td>
+    <td style="color:#10b981">${fmt(s.fees.collected)}</td>
+    <td style="color:#ef4444">${fmt(s.fees.pending)}</td>
+    <td><div style="display:flex;align-items:center;gap:10px">${progBar(r,r>90?'#10b981':'#f59e0b',8)}<span style="color:${r>90?'#10b981':'#f59e0b'};font-weight:700;min-width:40px">${r}%</span></div></td>
+  </tr>`;}).join('')}</tbody></table>`;
+}
+
+// ─── MINISTRY STUDENTS ─────────────────────────────────────────────────────────
+function renderMinStudents() {
+  const schoolSections = schools.map((s,si) => {
+    if(s.students_list.length===0) return `<div style="margin-bottom:32px;animation:contentIn .5s ease both ${si*0.15}s">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)">
+        <span style="font-size:20px">🏫</span>
+        <div><div style="font-weight:700;font-size:16px">${esc(s.name)}</div><div style="font-size:12px;color:#64748b">${esc(s.region)} · ${esc(s.type)}</div></div>
+      </div><p class="empty" style="padding:20px 0">${t('t_no_students')}</p></div>`;
+    // Group by grade
+    const byGrade = {};
+    s.students_list.forEach(st=>{ if(!byGrade[st.grade]) byGrade[st.grade]=[]; byGrade[st.grade].push(st); });
+    const gradeBlocks = Object.keys(byGrade).sort().map(grade=>{
+      const rows = byGrade[grade].map((st,i)=>`<tr class="trow-anim" style="animation-delay:${i*0.03}s">
+        <td style="font-weight:600">${esc(st.name)}</td><td>${esc(st.grade)}</td>
+        <td style="font-weight:700;color:${perfColor(st.avg)}">${st.avg}%</td>
+        <td>${st.attendance}%</td><td>${statusBadge(st.status)}</td>
+      </tr>`).join('');
+      return `<div style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:2px;margin-bottom:10px;padding:6px 12px;background:rgba(255,255,255,.03);border-radius:8px;display:inline-block">${lang==='ar'?'الصف':'CLASS'} ${grade}</div>
+        <table><thead><tr><th>${t('t_name')}</th><th>${t('t_grade')}</th><th>${t('t_avg')}</th><th>${t('t_attendance')}</th><th>${t('t_status')}</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+    }).join('');
+    return `<div style="margin-bottom:36px;animation:contentIn .5s ease both ${si*0.15}s">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid rgba(59,130,246,.2)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:22px">🏫</span>
+          <div><div style="font-weight:700;font-size:17px">${esc(s.name)}</div>
+            <div style="font-size:12px;color:#64748b">${esc(s.region)} · ${esc(s.type)}</div></div>
+        </div>
+        <span style="background:rgba(59,130,246,.2);color:#93c5fd;font-size:12px;padding:5px 14px;border-radius:20px;font-weight:600">${s.students_list.length} ${lang==='ar'?'طالب':'students'}</span>
+      </div>${gradeBlocks}</div>`;
+  }).join('');
+  const totalStudents=schools.reduce((a,s)=>a+s.students_list.length,0);
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="page-title" style="margin-bottom:0">${t('t_students')}</div>
+    <span style="color:#64748b;font-size:14px">${totalStudents} ${t('t_total_records')} ${schools.length} ${t('t_schools_count')}</span>
+  </div><div class="page-sub" style="margin-bottom:28px">${t('t_stu_sub')}</div>${schoolSections}`;
+}
+
+// ─── ADD SCHOOL ────────────────────────────────────────────────────────────────
+function openAddSchool() { document.getElementById('addSchoolModal').classList.add('open'); }
+function closeAddSchool() {
+  document.getElementById('addSchoolModal').classList.remove('open');
+  document.getElementById('addSchoolError').style.display='none';
+  ['as_name','as_principal','as_email','as_phone','as_founded','as_username','as_password'].forEach(id=>document.getElementById(id).value='');
+}
+function addSchool() {
+  const name=document.getElementById('as_name').value.trim();
+  const principal=document.getElementById('as_principal').value.trim();
+  const email=document.getElementById('as_email').value.trim();
+  const phone=document.getElementById('as_phone').value.trim();
+  const founded=parseInt(document.getElementById('as_founded').value)||new Date().getFullYear();
+  const region=document.getElementById('as_region').value;
+  const type=document.getElementById('as_type').value;
+  const username=document.getElementById('as_username').value.trim();
+  const password=document.getElementById('as_password').value;
+  const errEl=document.getElementById('addSchoolError');
+  if(!name||!principal||!username||!password){errEl.textContent='Name, Principal, Username and Password are required.';errEl.style.display='block';return;}
+  if(schools.find(s=>s.username===username)){errEl.textContent='Username already taken.';errEl.style.display='block';return;}
+  if(password.length<4){errEl.textContent='Password must be at least 4 characters.';errEl.style.display='block';return;}
+  const id='sch-'+Date.now().toString().slice(-6);
+  const rand=(base)=>MONTHS.map(()=>base+Math.floor(Math.random()*10));
+  schools.push({id,name,region,type,principal,founded,email,phone,username,password,students:0,teachers:0,attendance:rand(75),performance:rand(65),fees:{total:0,collected:0,pending:0},subjects:[],recentResults:[],students_list:[],announcements:[]});
+  saveSchools(); closeAddSchool(); renderMinistry(currentMinSection);
+}
+
+// ─── SCHOOL NAV ────────────────────────────────────────────────────────────────
+function showSchSection(sec, btn) {
+  currentSchSection=sec;
+  document.querySelectorAll('#schoolApp .sidebar-nav .nav-btn').forEach(b=>b.classList.remove('active-s'));
+  if(btn) btn.classList.add('active-s');
+  renderSchool(sec);
+}
+function renderSchool(sec) {
+  const s=getSchool(activeSchoolId); if(!s) return;
+  const el=document.getElementById('schoolMain');
+  if(sec==='dashboard') el.innerHTML=renderSchDashboard(s);
+  else if(sec==='students') el.innerHTML=renderSchStudents(s);
+  else if(sec==='attendance') el.innerHTML=renderSchAttendance(s);
+  else if(sec==='results') el.innerHTML=renderSchResults(s);
+  else if(sec==='finance') el.innerHTML=renderSchFinance(s);
+  else if(sec==='announcements') el.innerHTML=renderSchAnnouncements(s);
+  else if(sec==='profile') el.innerHTML=renderSchProfile(s);
+  animateContent(el);
+}
+
+// ─── SCHOOL SECTIONS ──────────────────────────────────────────────────────────
+function renderSchDashboard(s) {
+  const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+  return `<div class="page-title">${esc(s.name)}</div>
+  <div class="page-sub">${esc(s.region)} ${t('t_region_region')} · ${esc(s.type)} · ${t('t_principal')}: ${esc(s.principal)}</div>
+  <div class="grid-4" style="margin-bottom:28px">
+    ${[{l:t('t_students_count'),v:fmt(s.students),i:'👨‍🎓',c:'#3b82f6'},{l:t('t_teachers_count'),v:fmt(s.teachers),i:'👩‍🏫',c:'#10b981'},{l:t('t_avg_att'),v:att+'%',i:'📋',c:'#f59e0b'},{l:t('t_avg_perf'),v:perf+'%',i:'📈',c:'#8b5cf6'}].map((c,i)=>`<div class="stat-card" style="animation:contentIn .5s ease both ${i*0.08}s"><div style="font-size:22px;margin-bottom:8px">${c.i}</div><div class="stat-val" style="color:${c.c}">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('')}
+  </div>
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_monthly_att')}</div>${sparkHtml(s.attendance,'#10b981',80)}${monthLabels()}</div>
+    <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_monthly_perf')}</div>${sparkHtml(s.performance,'#3b82f6',80)}${monthLabels()}</div>
+  </div>
+  <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_recent_ann')}</div>
+    ${s.announcements.length===0?`<p class="empty" style="padding:20px 0">${t('t_no_ann')}</p>`:s.announcements.slice(0,3).map(a=>`<div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.05)"><div style="font-size:20px">📢</div><div><div style="font-weight:600;margin-bottom:2px">${esc(a.title)}</div><div style="font-size:12px;color:#64748b">${esc(a.date)} · ${esc(a.body)}</div></div></div>`).join('')}
+  </div>`;
+}
+
+function renderSchStudents(s) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div class="page-title" style="margin-bottom:0">${t('nav_students')}</div>
+    <button onclick="toggleAddStudent()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_add_student')}</button>
+  </div>
+  <div id="addStudentForm" style="display:none">
+    <div class="inline-form"><h3>${t('t_new_student')}</h3>
+      <div class="ifgrid">
+        <input id="st_name" placeholder="${t('t_full_name')}"/>
+        <input id="st_grade" placeholder="${t('t_grade_ph')}"/>
+        <input id="st_avg" type="number" placeholder="${lang==='ar'?'متوسط الدرجة':'Avg Score (0-100)'}" min="0" max="100"/>
+        <input id="st_att" type="number" placeholder="${lang==='ar'?'نسبة الحضور %':'Attendance %'}" min="0" max="100"/>
+        <select id="st_status"><option>Excellent</option><option>Very Good</option><option selected>Good</option><option>Needs Support</option></select>
+      </div>
+      <div class="if-actions">
+        <button class="btn-sm-green" onclick="addStudent()">${t('t_save')}</button>
+        <button class="btn-sm-cancel" onclick="toggleAddStudent()">${t('cancel')}</button>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>${t('t_name')}</th><th>${t('t_grade')}</th><th>${t('t_avg')}</th><th>${t('t_attendance')}</th><th>${t('t_status')}</th><th></th></tr></thead>
+  <tbody id="studentsTbody">${renderStudentRows(s)}</tbody></table>`;
+}
+function renderStudentRows(s) {
+  if(s.students_list.length===0) return `<tr><td colspan="6" class="empty">${t('t_no_students_yet')}</td></tr>`;
+  return s.students_list.map((st,i)=>`<tr class="trow-anim" style="animation-delay:${i*0.025}s">
+    <td style="font-weight:600">${esc(st.name)}</td><td>${esc(st.grade)}</td>
+    <td style="font-weight:700;color:${perfColor(st.avg)}">${st.avg}%</td>
+    <td>${st.attendance}%</td><td>${statusBadge(st.status)}</td>
+    <td><button onclick="removeStudent(${st.id})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.background='none'">✕</button></td>
+  </tr>`).join('');
+}
+function toggleAddStudent(){const f=document.getElementById('addStudentForm');f.style.display=f.style.display==='none'?'block':'none';}
+function addStudent(){
+  const s=getSchool(activeSchoolId);
+  const name=document.getElementById('st_name').value.trim();
+  const grade=document.getElementById('st_grade').value.trim();
+  const av=parseInt(document.getElementById('st_avg').value)||0;
+  const at=parseInt(document.getElementById('st_att').value)||0;
+  const status=document.getElementById('st_status').value;
+  if(!name||!grade) return;
+  s.students_list.push({id:Date.now(),name,grade,avg:av,attendance:at,status});
+  saveSchools();
+  document.getElementById('addStudentForm').style.display='none';
+  ['st_name','st_grade','st_avg','st_att'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('studentsTbody').innerHTML=renderStudentRows(s);
+}
+function removeStudent(id){
+  const s=getSchool(activeSchoolId);
+  s.students_list=s.students_list.filter(st=>st.id!==id);
+  saveSchools();
+  document.getElementById('studentsTbody').innerHTML=renderStudentRows(s);
+}
+
+function renderSchAttendance(s) {
+  const att=avg(s.attendance);
+  return `<div class="page-title">${t('t_att_records')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_monthly_tracking')}</div>
+  <div class="grid-4" style="margin-bottom:28px">
+    ${[{l:t('t_annual_avg'),v:att+'%',c:'#10b981'},{l:t('t_best_month'),v:Math.max(...s.attendance)+'%',c:'#3b82f6'},{l:t('t_lowest_month'),v:Math.min(...s.attendance)+'%',c:'#f59e0b'},{l:t('t_above90'),v:s.attendance.filter(v=>v>=90).length+' '+t('t_months_lbl'),c:'#8b5cf6'}].map((c,i)=>`<div class="stat-card" style="animation:contentIn .5s ease both ${i*0.08}s"><div class="stat-val" style="color:${c.c}">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('')}
+  </div>
+  <div class="card">
+    <div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:20px">${t('t_monthly_att_rate')}</div>
+    ${sparkHtml(s.attendance,'#10b981',140)}
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);margin-top:10px;gap:3px">
+      ${getMonths().map((m,i)=>`<div style="text-align:center"><div style="font-size:10px;color:#475569">${m}</div><div style="font-size:12px;font-weight:700;color:${s.attendance[i]>=90?'#10b981':'#f59e0b'};margin-top:4px">${s.attendance[i]}%</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderSchResults(s) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div class="page-title" style="margin-bottom:0">${t('t_exam_results')}</div>
+    <button onclick="toggleAddResult()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_add_result')}</button>
+  </div>
+  <div id="addResultForm" style="display:none">
+    <div class="inline-form"><h3>${t('t_new_result')}</h3>
+      <div class="ifgrid">
+        <input id="rx_exam" placeholder="${t('t_exam_name')}"/>
+        <input id="rx_date" placeholder="${t('t_date_ph')}"/>
+        <input id="rx_avg" type="number" placeholder="${t('t_avg_ph')}" min="0" max="100"/>
+        <input id="rx_top" type="number" placeholder="${t('t_top_ph')}" min="0" max="100"/>
+        <input id="rx_pass" type="number" placeholder="${t('t_pass_ph')}" min="0" max="100"/>
+      </div>
+      <div class="if-actions"><button class="btn-sm-green" onclick="addResult()">${t('t_save')}</button><button class="btn-sm-cancel" onclick="toggleAddResult()">${t('cancel')}</button></div>
+    </div>
+  </div>
+  ${s.subjects.length>0?`<div class="card" style="margin-bottom:20px"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_subj_perf')}</div>
+    ${s.subjects.map(sub=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>${esc(sub.name)}</span><span style="color:#3b82f6;font-weight:700">${sub.avg}% avg · ${sub.pass}% pass</span></div>${progBar(sub.avg,sub.avg>=80?'#10b981':sub.avg>=70?'#3b82f6':'#f59e0b',8)}</div>`).join('')}
+  </div>`:''}
+  <div id="resultsList">${renderResultsList(s)}</div>`;
+}
+function renderResultsList(s){
+  if(s.recentResults.length===0) return `<p class="empty">${t('t_no_results')}</p>`;
+  return s.recentResults.map(r=>`<div class="result-card">
+    <div><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(r.exam)}</div><div style="font-size:12px;color:#64748b">${esc(r.date)}</div></div>
+    ${[{l:t('t_avg_score'),v:r.avg,c:'#3b82f6'},{l:t('t_top_score'),v:r.top,c:'#10b981'},{l:t('t_pass_rate'),v:r.pass,c:'#f59e0b'}].map(m=>`<div class="result-metric"><div class="rv" style="color:${m.c}">${m.v}%</div><div class="rl">${m.l}</div></div>`).join('')}
+  </div>`).join('');
+}
+function toggleAddResult(){const f=document.getElementById('addResultForm');f.style.display=f.style.display==='none'?'block':'none';}
+function addResult(){
+  const s=getSchool(activeSchoolId);
+  const exam=document.getElementById('rx_exam').value.trim();
+  if(!exam) return;
+  s.recentResults.unshift({exam,date:document.getElementById('rx_date').value,avg:parseInt(document.getElementById('rx_avg').value)||0,top:parseInt(document.getElementById('rx_top').value)||0,pass:parseInt(document.getElementById('rx_pass').value)||0});
+  saveSchools();
+  document.getElementById('addResultForm').style.display='none';
+  ['rx_exam','rx_date','rx_avg','rx_top','rx_pass'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('resultsList').innerHTML=renderResultsList(s);
+}
+
+function renderSchFinance(s) {
+  const r=pct(s.fees.collected,s.fees.total||1);
+  return `<div class="page-title">${t('t_fee_mgmt')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_fee_sub')}</div>
+  <div class="grid-3" style="margin-bottom:28px">
+    ${[{l:t('t_total_fees_lbl'),v:fmt(s.fees.total),c:'#64748b',i:'💼'},{l:t('t_collected_lbl'),v:fmt(s.fees.collected),c:'#10b981',i:'✅'},{l:t('t_pending_lbl'),v:fmt(s.fees.pending),c:'#ef4444',i:'⏳'}].map((c,i)=>`<div class="card" style="animation:contentIn .5s ease both ${i*0.1}s"><div style="font-size:28px">${c.i}</div><div style="font-size:28px;font-weight:700;color:${c.c};margin:8px 0 4px">${c.v}</div><div style="color:#64748b;font-size:13px">${c.l}</div></div>`).join('')}
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:12px;color:#94a3b8;letter-spacing:2px">${t('t_fee_coll_rate').toUpperCase()}</div>
+      <span style="font-size:32px;font-weight:700;color:${r>90?'#10b981':'#f59e0b'}">${r}%</span>
+    </div>
+    <div style="height:16px;background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden"><div style="height:100%;width:${r}%;border-radius:8px;background:${r>90?'linear-gradient(90deg,#10b981,#059669)':'linear-gradient(90deg,#f59e0b,#d97706)'};animation:progGrow 1s cubic-bezier(.4,0,.2,1) both .3s;"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:12px;color:#64748b">0%</span><span style="font-size:12px;color:#64748b">100%</span></div>
+  </div>`;
+}
+
+function renderSchAnnouncements(s) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div class="page-title" style="margin-bottom:0">${t('nav_announce')}</div>
+    <button onclick="toggleAddAnn()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_ann_new')}</button>
+  </div>
+  <div id="addAnnForm" style="display:none">
+    <div class="inline-form"><h3>${t('t_ann_new_label')}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <input id="ann_title" placeholder="${t('t_ann_title_ph')}" style="padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:13px"/>
+        <input id="ann_date" placeholder="${t('t_ann_date_ph')}" style="padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:13px"/>
+      </div>
+      <textarea id="ann_body" rows="3" placeholder="${t('t_ann_body_ph')}"></textarea>
+      <div class="if-actions"><button class="btn-sm-green" onclick="addAnnouncement()">${t('t_ann_post')}</button><button class="btn-sm-cancel" onclick="toggleAddAnn()">${t('cancel')}</button></div>
+    </div>
+  </div>
+  <div id="annList">${renderAnnList(s)}</div>`;
+}
+function renderAnnList(s){
+  if(s.announcements.length===0) return `<p class="empty">${t('t_no_ann')}</p>`;
+  return s.announcements.map(a=>`<div class="ann-card">
+    <div style="font-size:24px;margin-top:2px">📢</div>
+    <div style="flex:1"><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(a.title)}</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px">${esc(a.date)}</div>
+      <div style="font-size:14px;color:#94a3b8">${esc(a.body)}</div>
+    </div>
+    <button class="ann-del" onclick="removeAnn(${a.id})">✕</button>
+  </div>`).join('');
+}
+function toggleAddAnn(){const f=document.getElementById('addAnnForm');f.style.display=f.style.display==='none'?'block':'none';}
+function addAnnouncement(){
+  const s=getSchool(activeSchoolId);
+  const title=document.getElementById('ann_title').value.trim(); if(!title) return;
+  s.announcements.unshift({id:Date.now(),title,date:document.getElementById('ann_date').value,body:document.getElementById('ann_body').value.trim()});
+  saveSchools();
+  document.getElementById('addAnnForm').style.display='none';
+  ['ann_title','ann_date','ann_body'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('annList').innerHTML=renderAnnList(s);
+}
+function removeAnn(id){
+  const s=getSchool(activeSchoolId);
+  s.announcements=s.announcements.filter(a=>a.id!==id);
+  saveSchools();
+  document.getElementById('annList').innerHTML=renderAnnList(s);
+}
+
+function renderSchProfile(s) {
+  return `<div class="page-title">${t('t_sch_profile')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_update_info')}</div>
+  <div class="card" style="max-width:600px">
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:4px">${t('t_sch_name_lbl')}</div>
+      <div style="font-size:18px;font-weight:700">${esc(s.name)}</div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:4px">${t('t_sch_id_lbl')}</div>
+      <div style="font-size:14px;color:#94a3b8">${esc(s.id)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      ${[{k:'principal',l:t('t_principal'),t:'text',v:s.principal},{k:'email',l:'Email',t:'email',v:s.email},{k:'phone',l:t('f_phone'),t:'text',v:s.phone},{k:'students',l:t('t_students_count'),t:'number',v:s.students},{k:'teachers',l:t('t_teachers_count'),t:'number',v:s.teachers}].map(f=>`<div>
+        <label style="display:block;font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:6px">${f.l.toUpperCase()}</label>
+        <input type="${f.t}" id="pf_${f.k}" value="${esc(String(f.v))}" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:14px;box-sizing:border-box;transition:border .22s;" onfocus="this.style.borderColor='rgba(59,130,246,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+      </div>`).join('')}
+    </div>
+    <button id="saveProfileBtn" onclick="saveProfile()" style="margin-top:24px;padding:12px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;font-size:14px;transition:all .25s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_save_changes')}</button>
+  </div>`;
+}
+function saveProfile(){
+  const s=getSchool(activeSchoolId);
+  s.principal=document.getElementById('pf_principal').value.trim()||s.principal;
+  s.email=document.getElementById('pf_email').value.trim()||s.email;
+  s.phone=document.getElementById('pf_phone').value.trim()||s.phone;
+  s.students=parseInt(document.getElementById('pf_students').value)||s.students;
+  s.teachers=parseInt(document.getElementById('pf_teachers').value)||s.teachers;
+  saveSchools();
+  const btn=document.getElementById('saveProfileBtn');
+  btn.textContent=t('t_saved'); btn.style.background='#10b981';
+  setTimeout(()=>{btn.textContent=t('t_save_changes'); btn.style.background='linear-gradient(135deg,#10b981,#059669)';}, 2000);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  switchRole('ministry');
+});
+
+// ─── PDF DOWNLOAD ─────────────────────────────────────────────────────────────
+function downloadPDF(type) {
+  const win = window.open('','_blank');
+  const dateStr = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  let html = '';
+
+  if(type === 'students') {
+    let body = '';
+    schools.forEach(s => {
+      const byGrade = {};
+      s.students_list.forEach(st=>{ if(!byGrade[st.grade]) byGrade[st.grade]=[]; byGrade[st.grade].push(st); });
+      body += `<div class="school-section">
+        <h2>🏫 ${s.name}</h2>
+        <p class="meta">${s.region} · ${s.type} · Principal: ${s.principal}</p>`;
+      Object.keys(byGrade).sort().forEach(grade => {
+        body += `<h3>Class ${grade}</h3>
+        <table>
+          <thead><tr><th>#</th><th>Student Name</th><th>Grade</th><th>Avg Score</th><th>Attendance</th><th>Status</th></tr></thead>
+          <tbody>`;
+        byGrade[grade].forEach((st,i) => {
+          const sc = st.status==='Excellent'?'#059669':st.status==='Very Good'?'#2563eb':st.status==='Good'?'#d97706':'#dc2626';
+          body += `<tr>
+            <td>${i+1}</td>
+            <td><strong>${st.name}</strong></td>
+            <td>${st.grade}</td>
+            <td style="color:${st.avg>=90?'#059669':st.avg>=75?'#2563eb':st.avg>=60?'#d97706':'#dc2626'};font-weight:700">${st.avg}%</td>
+            <td>${st.attendance}%</td>
+            <td><span style="background:${sc}22;color:${sc};padding:2px 8px;border-radius:4px;font-size:12px">${st.status}</span></td>
+          </tr>`;
+        });
+        body += `</tbody></table>`;
+      });
+      body += `</div>`;
+    });
+    html = pdfTemplate('Student Records — All Schools', dateStr, body);
+  }
+
+  else if(type === 'attendance') {
+    const MONTHS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    let body = '';
+    schools.forEach(s => {
+      const avgAtt = Math.round(s.attendance.reduce((a,b)=>a+b,0)/12);
+      body += `<div class="school-section">
+        <h2>🏫 ${s.name}</h2>
+        <p class="meta">${s.region} · ${s.type} · ${s.students.toLocaleString()} students enrolled</p>
+        <div class="summary-row">
+          <div class="summary-box"><div class="sv" style="color:#059669">${avgAtt}%</div><div class="sl">Annual Average</div></div>
+          <div class="summary-box"><div class="sv" style="color:#2563eb">${Math.max(...s.attendance)}%</div><div class="sl">Best Month</div></div>
+          <div class="summary-box"><div class="sv" style="color:#d97706">${Math.min(...s.attendance)}%</div><div class="sl">Lowest Month</div></div>
+          <div class="summary-box"><div class="sv" style="color:#7c3aed">${s.attendance.filter(v=>v>=90).length}</div><div class="sl">Months ≥ 90%</div></div>
+        </div>
+        <table>
+          <thead><tr>${MONTHS_EN.map(m=>`<th>${m}</th>`).join('')}</tr></thead>
+          <tbody><tr>${s.attendance.map(v=>`<td style="color:${v>=90?'#059669':'#d97706'};font-weight:700;text-align:center">${v}%</td>`).join('')}</tr></tbody>
+        </table>
+      </div>`;
+    });
+    // Overall summary table
+    body = `<div class="school-section">
+      <h2>📋 Overall Attendance Summary</h2>
+      <table>
+        <thead><tr><th>School</th><th>Region</th><th>Type</th><th>Avg Attendance</th><th>Best Month</th><th>Lowest Month</th></tr></thead>
+        <tbody>${schools.map(s=>{
+          const a=Math.round(s.attendance.reduce((x,y)=>x+y,0)/12);
+          return `<tr>
+            <td><strong>${s.name}</strong></td><td>${s.region}</td><td>${s.type}</td>
+            <td style="color:${a>=90?'#059669':'#d97706'};font-weight:700">${a}%</td>
+            <td style="color:#059669;font-weight:700">${Math.max(...s.attendance)}%</td>
+            <td style="color:#d97706;font-weight:700">${Math.min(...s.attendance)}%</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>` + body;
+    html = pdfTemplate('Attendance Report — All Schools', dateStr, body);
+  }
+
+  else if(type === 'exams') {
+    let body = '';
+    schools.forEach(s => {
+      body += `<div class="school-section">
+        <h2>🏫 ${s.name}</h2>
+        <p class="meta">${s.region} · ${s.type} · Principal: ${s.principal}</p>
+        <h3>Subject Performance</h3>
+        <table>
+          <thead><tr><th>Subject</th><th>Average Score</th><th>Pass Rate</th><th>Rating</th></tr></thead>
+          <tbody>${s.subjects.map(sub=>{
+            const rating = sub.avg>=90?'Excellent':sub.avg>=80?'Very Good':sub.avg>=70?'Good':'Needs Improvement';
+            const rc = sub.avg>=90?'#059669':sub.avg>=80?'#2563eb':sub.avg>=70?'#d97706':'#dc2626';
+            return `<tr>
+              <td><strong>${sub.name}</strong></td>
+              <td style="color:${rc};font-weight:700">${sub.avg}%</td>
+              <td>${sub.pass}%</td>
+              <td><span style="background:${rc}22;color:${rc};padding:2px 8px;border-radius:4px;font-size:12px">${rating}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+        <h3>Recent Exam Results</h3>
+        <table>
+          <thead><tr><th>Exam</th><th>Date</th><th>Average Score</th><th>Top Score</th><th>Pass Rate</th></tr></thead>
+          <tbody>${s.recentResults.length===0?'<tr><td colspan="5" style="color:#94a3b8;text-align:center">No results recorded</td></tr>':s.recentResults.map(r=>`<tr>
+            <td><strong>${r.exam}</strong></td><td>${r.date}</td>
+            <td style="color:#2563eb;font-weight:700">${r.avg}%</td>
+            <td style="color:#059669;font-weight:700">${r.top}%</td>
+            <td style="color:#d97706;font-weight:700">${r.pass}%</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+    });
+    html = pdfTemplate('Exam Results Report — All Schools', dateStr, body);
+  }
+
+  else if(type === 'finance') {
+    const total=schools.reduce((a,s)=>a+s.fees.total,0);
+    const coll=schools.reduce((a,s)=>a+s.fees.collected,0);
+    const pend=schools.reduce((a,s)=>a+s.fees.pending,0);
+    const overallRate = Math.round((coll/total)*100);
+    let body = `<div class="school-section">
+      <h2>💰 National Finance Summary</h2>
+      <div class="summary-row">
+        <div class="summary-box"><div class="sv" style="color:#475569">${total.toLocaleString()}</div><div class="sl">Total Fees Due</div></div>
+        <div class="summary-box"><div class="sv" style="color:#059669">${coll.toLocaleString()}</div><div class="sl">Total Collected</div></div>
+        <div class="summary-box"><div class="sv" style="color:#dc2626">${pend.toLocaleString()}</div><div class="sl">Total Pending</div></div>
+        <div class="summary-box"><div class="sv" style="color:${overallRate>90?'#059669':'#d97706'}">${overallRate}%</div><div class="sl">Collection Rate</div></div>
+      </div>
+      <table>
+        <thead><tr><th>School</th><th>Region</th><th>Total Fees</th><th>Collected</th><th>Pending</th><th>Rate</th></tr></thead>
+        <tbody>${schools.map(s=>{
+          const r=Math.round((s.fees.collected/s.fees.total)*100);
+          return `<tr>
+            <td><strong>${s.name}</strong></td><td>${s.region}</td>
+            <td>${s.fees.total.toLocaleString()}</td>
+            <td style="color:#059669;font-weight:700">${s.fees.collected.toLocaleString()}</td>
+            <td style="color:#dc2626;font-weight:700">${s.fees.pending.toLocaleString()}</td>
+            <td style="color:${r>90?'#059669':'#d97706'};font-weight:700">${r}%</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+    html = pdfTemplate('Finance Report — All Schools', dateStr, body);
+  }
+
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 600);
+}
+
+function pdfTemplate(title, dateStr, body) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>${title}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Georgia,serif;background:#fff;color:#1e293b;padding:0;}
+    .header{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:36px 48px;display:flex;justify-content:space-between;align-items:center;}
+    .header h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+    .header .sub{font-size:13px;color:#93c5fd;letter-spacing:1px;}
+    .header .meta{text-align:right;font-size:13px;color:#94a3b8;}
+    .header .icon{font-size:48px;margin-right:16px;}
+    .content{padding:32px 48px;}
+    .school-section{margin-bottom:40px;border-bottom:2px solid #e2e8f0;padding-bottom:32px;}
+    .school-section:last-child{border-bottom:none;}
+    h2{font-size:18px;color:#0f172a;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+    h3{font-size:14px;color:#475569;letter-spacing:1px;text-transform:uppercase;margin:20px 0 10px;font-weight:600;}
+    .meta{font-size:13px;color:#64748b;margin-bottom:16px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;}
+    thead tr{background:#f1f5f9;}
+    th{padding:10px 12px;text-align:left;font-size:11px;color:#64748b;letter-spacing:1px;font-weight:600;border-bottom:2px solid #e2e8f0;}
+    td{padding:10px 12px;border-bottom:1px solid #f1f5f9;}
+    tr:last-child td{border-bottom:none;}
+    tr:nth-child(even){background:#f8fafc;}
+    .summary-row{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap;}
+    .summary-box{flex:1;min-width:120px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;text-align:center;}
+    .sv{font-size:22px;font-weight:700;margin-bottom:4px;}
+    .sl{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px;}
+    .footer{background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 48px;display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;}
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .header{background:linear-gradient(135deg,#0f172a,#1e3a5f)!important;}
+      .school-section{page-break-inside:avoid;}
+      h2{page-break-before:auto;}
+    }
+  </style></head><body>
+  <div class="header">
+    <div style="display:flex;align-items:center">
+      <div class="icon">🏛️</div>
+      <div><h1>${title}</h1><div class="sub">MINISTRY OF EDUCATION — NATIONAL SCHOOL PORTAL</div></div>
+    </div>
+    <div class="meta"><div style="font-size:15px;color:#fff;font-weight:700;margin-bottom:4px">وزارة التعليم</div><div>Generated: ${dateStr}</div></div>
+  </div>
+  <div class="content">${body}</div>
+  <div class="footer"><span>Ministry of Education — Confidential</span><span>${dateStr}</span></div>
+  </body></html>`;
+}
+</script>
+</body>
+</html>
