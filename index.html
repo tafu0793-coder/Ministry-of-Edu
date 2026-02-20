@@ -209,8 +209,8 @@
   .info-field-label{font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:6px;}
   .info-field-val{font-size:15px;font-weight:600;}
   .empty{color:#475569;text-align:center;padding:60px 0;}
-  .result-card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto auto auto;gap:32px;align-items:center;transition:border-color .22s,transform .25s;}
-  .result-card:hover{border-color:rgba(255,255,255,.14);transform:translateX(3px);}
+  .result-card{background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.07);padding:24px;margin-bottom:14px;display:flex;gap:24px;align-items:flex-start;transition:border-color .22s;}
+  .result-card:hover{border-color:rgba(255,255,255,.14);}
   .result-metric{text-align:center;}
   .result-metric .rv{font-size:24px;font-weight:700;}
   .result-metric .rl{font-size:11px;color:#64748b;}
@@ -677,7 +677,7 @@ function switchRole(role) {
     document.getElementById('userLabel').textContent = t('login_user_school');
     document.getElementById('passLabel').textContent = t('login_pass_school');
   }
-  document.getElementById('loginPass').placeholder = '';
+  document.getElementById('loginPass').placeholder = '••••••••';
   document.getElementById('loginError').style.display='none';
 }
 
@@ -1034,12 +1034,14 @@ function renderSchool(sec) {
 }
 
 // ─── SCHOOL SECTIONS ──────────────────────────────────────────────────────────
+function iStyle(extra=''){return `width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-family:Georgia,serif;font-size:13px;outline:none;transition:border .2s;${extra}`;}
+
 function renderSchDashboard(s) {
-  const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total);
+  const att=avg(s.attendance),perf=avg(s.performance),fr=pct(s.fees.collected,s.fees.total||1);
   return `<div class="page-title">${esc(s.name)}</div>
-  <div class="page-sub">${esc(s.region)} ${t('t_region_region')} · ${esc(s.type)} · ${t('t_principal')}: ${esc(s.principal)}</div>
+  <div class="page-sub">${esc(s.region)} · ${esc(s.type)} · ${t('t_principal')}: ${esc(s.principal)}</div>
   <div class="grid-4" style="margin-bottom:28px">
-    ${[{l:t('t_students_count'),v:fmt(s.students),i:'👨‍🎓',c:'#3b82f6'},{l:t('t_teachers_count'),v:fmt(s.teachers),i:'👩‍🏫',c:'#10b981'},{l:t('t_avg_att'),v:att+'%',i:'📋',c:'#f59e0b'},{l:t('t_avg_perf'),v:perf+'%',i:'📈',c:'#8b5cf6'}].map((c,i)=>`<div class="stat-card" style="animation:contentIn .5s ease both ${i*0.08}s"><div style="font-size:22px;margin-bottom:8px">${c.i}</div><div class="stat-val" style="color:${c.c}">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('')}
+    ${[{l:t('t_students_count'),v:s.students_list.length,i:'👨‍🎓',c:'#3b82f6'},{l:t('t_teachers_count'),v:fmt(s.teachers),i:'👩‍🏫',c:'#10b981'},{l:t('t_avg_att'),v:att+'%',i:'📋',c:'#f59e0b'},{l:t('t_avg_perf'),v:perf+'%',i:'📈',c:'#8b5cf6'}].map((c,i)=>`<div class="stat-card" style="animation:contentIn .5s ease both ${i*0.08}s"><div style="font-size:22px;margin-bottom:8px">${c.i}</div><div class="stat-val" style="color:${c.c}">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('')}
   </div>
   <div class="grid-2" style="margin-bottom:20px">
     <div class="card"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_monthly_att')}</div>${sparkHtml(s.attendance,'#10b981',80)}${monthLabels()}</div>
@@ -1050,208 +1052,381 @@ function renderSchDashboard(s) {
   </div>`;
 }
 
+// ── STUDENTS ──
 function renderSchStudents(s) {
-  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-    <div class="page-title" style="margin-bottom:0">${t('nav_students')}</div>
-    <button onclick="toggleAddStudent()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_add_student')}</button>
+  const byGrade={};
+  s.students_list.forEach(st=>{if(!byGrade[st.grade])byGrade[st.grade]=[];byGrade[st.grade].push(st);});
+  const gradeOpts=[...new Set(s.students_list.map(st=>st.grade))].sort();
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div class="page-title" style="margin-bottom:0">${t('nav_students')} <span style="font-size:14px;color:#64748b;font-weight:400">(${s.students_list.length})</span></div>
+    <button onclick="toggleForm('addStudentForm')" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">+ ${lang==='ar'?'إضافة طالب':'Add Student'}</button>
   </div>
   <div id="addStudentForm" style="display:none">
-    <div class="inline-form"><h3>${t('t_new_student')}</h3>
-      <div class="ifgrid">
-        <input id="st_name" placeholder="${t('t_full_name')}"/>
-        <input id="st_grade" placeholder="${t('t_grade_ph')}"/>
-        <input id="st_avg" type="number" placeholder="${lang==='ar'?'متوسط الدرجة':'Avg Score (0-100)'}" min="0" max="100"/>
-        <input id="st_att" type="number" placeholder="${lang==='ar'?'نسبة الحضور %':'Attendance %'}" min="0" max="100"/>
-        <select id="st_status"><option>Excellent</option><option>Very Good</option><option selected>Good</option><option>Needs Support</option></select>
+    <div class="inline-form">
+      <h3>${t('t_new_student')}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'الاسم الكامل':'Full Name'}</label><input id="st_name" style="${iStyle()}" placeholder="${lang==='ar'?'اسم الطالب':'Student name'}"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'الصف':'Grade'}</label><input id="st_grade" style="${iStyle()}" placeholder="${lang==='ar'?'مثال: 10A':'e.g. 10A'}"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'متوسط الدرجة':'Avg Score %'}</label><input id="st_avg" type="number" min="0" max="100" style="${iStyle()}" placeholder="0–100"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'نسبة الحضور':'Attendance %'}</label><input id="st_att" type="number" min="0" max="100" style="${iStyle()}" placeholder="0–100"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'الحالة':'Status'}</label>
+          <select id="st_status" style="${iStyle('background:#0f172a;')}">
+            <option value="Excellent">${lang==='ar'?'ممتاز':'Excellent'}</option>
+            <option value="Very Good">${lang==='ar'?'جيد جداً':'Very Good'}</option>
+            <option value="Good" selected>${lang==='ar'?'جيد':'Good'}</option>
+            <option value="Needs Support">${lang==='ar'?'يحتاج دعم':'Needs Support'}</option>
+          </select></div>
       </div>
       <div class="if-actions">
-        <button class="btn-sm-green" onclick="addStudent()">${t('t_save')}</button>
-        <button class="btn-sm-cancel" onclick="toggleAddStudent()">${t('cancel')}</button>
+        <button class="btn-sm-green" onclick="addStudent()">${lang==='ar'?'حفظ':'Save'}</button>
+        <button class="btn-sm-cancel" onclick="toggleForm('addStudentForm')">${lang==='ar'?'إلغاء':'Cancel'}</button>
       </div>
     </div>
   </div>
-  <table><thead><tr><th>${t('t_name')}</th><th>${t('t_grade')}</th><th>${t('t_avg')}</th><th>${t('t_attendance')}</th><th>${t('t_status')}</th><th></th></tr></thead>
-  <tbody id="studentsTbody">${renderStudentRows(s)}</tbody></table>`;
+  <div id="studentsTbody">${renderStudentRows(s)}</div>`;
 }
+
 function renderStudentRows(s) {
-  if(s.students_list.length===0) return `<tr><td colspan="6" class="empty">${t('t_no_students_yet')}</td></tr>`;
-  return s.students_list.map((st,i)=>`<tr class="trow-anim" style="animation-delay:${i*0.025}s">
-    <td style="font-weight:600">${esc(st.name)}</td><td>${esc(st.grade)}</td>
-    <td style="font-weight:700;color:${perfColor(st.avg)}">${st.avg}%</td>
-    <td>${st.attendance}%</td><td>${statusBadge(st.status)}</td>
-    <td><button onclick="removeStudent(${st.id})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.background='none'">✕</button></td>
-  </tr>`).join('');
+  if(s.students_list.length===0) return `<p class="empty">${t('t_no_students_yet')}</p>`;
+  const byGrade={};
+  s.students_list.forEach(st=>{if(!byGrade[st.grade])byGrade[st.grade]=[];byGrade[st.grade].push(st);});
+  return Object.keys(byGrade).sort().map(grade=>{
+    const rows=byGrade[grade].map((st,i)=>`
+      <tr id="strow-${st.id}">
+        <td><div style="font-weight:600">${esc(st.name)}</div><div style="font-size:11px;color:#64748b">${esc(st.grade)}</div></td>
+        <td><input type="number" min="0" max="100" value="${st.avg}" onchange="editStudent(${st.id},'avg',this.value)" style="${iStyle('width:70px;padding:6px 8px;')}"/></td>
+        <td><input type="number" min="0" max="100" value="${st.attendance}" onchange="editStudent(${st.id},'attendance',this.value)" style="${iStyle('width:70px;padding:6px 8px;')}"/></td>
+        <td><select onchange="editStudent(${st.id},'status',this.value)" style="${iStyle('background:#0f172a;width:130px;padding:6px 8px;')}">
+          ${['Excellent','Very Good','Good','Needs Support'].map(v=>`<option value="${v}"${st.status===v?' selected':''}>${lang==='ar'?{Excellent:'ممتاز','Very Good':'جيد جداً',Good:'جيد','Needs Support':'يحتاج دعم'}[v]:v}</option>`).join('')}
+        </select></td>
+        <td><button onclick="removeStudent(${st.id})" style="background:rgba(239,68,68,.1);border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:6px 10px;border-radius:6px;">✕</button></td>
+      </tr>`).join('');
+    return `<div style="margin-bottom:24px">
+      <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:2px;padding:6px 14px;background:rgba(255,255,255,.03);border-radius:8px;display:inline-block;margin-bottom:10px">${lang==='ar'?'الصف':'CLASS'} ${grade} — ${byGrade[grade].length} ${lang==='ar'?'طالب':'students'}</div>
+      <table>
+        <thead><tr><th>${lang==='ar'?'الطالب':'Student'}</th><th>${lang==='ar'?'الدرجة %':'Score %'}</th><th>${lang==='ar'?'الحضور %':'Attend %'}</th><th>${lang==='ar'?'الحالة':'Status'}</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }).join('');
 }
-function toggleAddStudent(){const f=document.getElementById('addStudentForm');f.style.display=f.style.display==='none'?'block':'none';}
+
+function toggleForm(id){const f=document.getElementById(id);if(f)f.style.display=f.style.display==='none'?'block':'none';}
 function addStudent(){
   const s=getSchool(activeSchoolId);
   const name=document.getElementById('st_name').value.trim();
-  const grade=document.getElementById('st_grade').value.trim();
-  const av=parseInt(document.getElementById('st_avg').value)||0;
-  const at=parseInt(document.getElementById('st_att').value)||0;
+  const grade=document.getElementById('st_grade').value.trim().toUpperCase();
+  const av=Math.min(100,Math.max(0,parseInt(document.getElementById('st_avg').value)||0));
+  const at=Math.min(100,Math.max(0,parseInt(document.getElementById('st_att').value)||0));
   const status=document.getElementById('st_status').value;
-  if(!name||!grade) return;
+  if(!name||!grade){alert(lang==='ar'?'يرجى إدخال الاسم والصف':'Please enter name and grade');return;}
   s.students_list.push({id:Date.now(),name,grade,avg:av,attendance:at,status});
-  saveSchools();
   document.getElementById('addStudentForm').style.display='none';
-  ['st_name','st_grade','st_avg','st_att'].forEach(id=>document.getElementById(id).value='');
+  ['st_name','st_grade','st_avg','st_att'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('studentsTbody').innerHTML=renderStudentRows(s);
+}
+function editStudent(id,field,val){
+  const s=getSchool(activeSchoolId);
+  const st=s.students_list.find(x=>x.id===id);
+  if(!st)return;
+  if(field==='avg'||field==='attendance') st[field]=Math.min(100,Math.max(0,parseInt(val)||0));
+  else st[field]=val;
+  if(field==='avg'){
+    const v=st.avg;
+    st.status=v>=90?'Excellent':v>=80?'Very Good':v>=65?'Good':'Needs Support';
+    document.getElementById('studentsTbody').innerHTML=renderStudentRows(s);
+  }
 }
 function removeStudent(id){
   const s=getSchool(activeSchoolId);
   s.students_list=s.students_list.filter(st=>st.id!==id);
-  saveSchools();
   document.getElementById('studentsTbody').innerHTML=renderStudentRows(s);
 }
 
+// ── ATTENDANCE ──
 function renderSchAttendance(s) {
   const att=avg(s.attendance);
-  return `<div class="page-title">${t('t_att_records')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_monthly_tracking')}</div>
+  const MONTHS_EN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const MONTHS_AR_FULL=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const ML=lang==='ar'?MONTHS_AR_FULL:MONTHS_EN;
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div><div class="page-title" style="margin-bottom:0">${t('t_att_records')}</div><div class="page-sub" style="margin-bottom:0;margin-top:4px">${t('t_monthly_tracking')}</div></div>
+    <button onclick="saveAttendance()" style="padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">${lang==='ar'?'💾 حفظ التغييرات':'💾 Save Changes'}</button>
+  </div>
   <div class="grid-4" style="margin-bottom:28px">
     ${[{l:t('t_annual_avg'),v:att+'%',c:'#10b981'},{l:t('t_best_month'),v:Math.max(...s.attendance)+'%',c:'#3b82f6'},{l:t('t_lowest_month'),v:Math.min(...s.attendance)+'%',c:'#f59e0b'},{l:t('t_above90'),v:s.attendance.filter(v=>v>=90).length+' '+t('t_months_lbl'),c:'#8b5cf6'}].map((c,i)=>`<div class="stat-card" style="animation:contentIn .5s ease both ${i*0.08}s"><div class="stat-val" style="color:${c.c}">${c.v}</div><div class="stat-label">${c.l}</div></div>`).join('')}
   </div>
-  <div class="card">
+  <div class="card" style="margin-bottom:24px">
     <div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:20px">${t('t_monthly_att_rate')}</div>
-    ${sparkHtml(s.attendance,'#10b981',140)}
-    <div style="display:grid;grid-template-columns:repeat(12,1fr);margin-top:10px;gap:3px">
-      ${getMonths().map((m,i)=>`<div style="text-align:center"><div style="font-size:10px;color:#475569">${m}</div><div style="font-size:12px;font-weight:700;color:${s.attendance[i]>=90?'#10b981':'#f59e0b'};margin-top:4px">${s.attendance[i]}%</div></div>`).join('')}
+    ${sparkHtml(s.attendance,'#10b981',120)}${monthLabels()}
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:20px">${lang==='ar'?'✏️ تعديل الحضور الشهري':'✏️ Edit Monthly Attendance'}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      ${s.attendance.map((v,i)=>`
+        <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.07)">
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px;font-weight:600">${ML[i]}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="att_${i}" value="${v}" min="0" max="100"
+              style="${iStyle('width:70px;font-size:18px;font-weight:700;color:'+( v>=90?'#10b981':'#f59e0b')+';padding:8px 10px;')}"
+              oninput="this.style.color=parseInt(this.value)>=90?'#10b981':'#f59e0b'"/>
+            <span style="color:#64748b;font-size:16px">%</span>
+          </div>
+          ${progBar(v, v>=90?'#10b981':'#f59e0b', 6)}
+        </div>`).join('')}
     </div>
+    <button onclick="saveAttendance()" style="margin-top:20px;padding:12px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">${lang==='ar'?'💾 حفظ التغييرات':'💾 Save Changes'}</button>
+    <span id="attSaved" style="margin-left:12px;color:#10b981;font-size:13px;display:none">✓ ${lang==='ar'?'تم الحفظ!':'Saved!'}</span>
   </div>`;
 }
+function saveAttendance(){
+  const s=getSchool(activeSchoolId);
+  for(let i=0;i<12;i++){
+    const el=document.getElementById('att_'+i);
+    if(el) s.attendance[i]=Math.min(100,Math.max(0,parseInt(el.value)||0));
+  }
+  const msg=document.getElementById('attSaved');
+  if(msg){msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
+  renderSchool('attendance');
+}
 
+// ── RESULTS ──
 function renderSchResults(s) {
-  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
     <div class="page-title" style="margin-bottom:0">${t('t_exam_results')}</div>
-    <button onclick="toggleAddResult()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_add_result')}</button>
+    <button onclick="toggleForm('addResultForm')" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">+ ${lang==='ar'?'إضافة نتائج':'Add Results'}</button>
   </div>
   <div id="addResultForm" style="display:none">
-    <div class="inline-form"><h3>${t('t_new_result')}</h3>
-      <div class="ifgrid">
-        <input id="rx_exam" placeholder="${t('t_exam_name')}"/>
-        <input id="rx_date" placeholder="${t('t_date_ph')}"/>
-        <input id="rx_avg" type="number" placeholder="${t('t_avg_ph')}" min="0" max="100"/>
-        <input id="rx_top" type="number" placeholder="${t('t_top_ph')}" min="0" max="100"/>
-        <input id="rx_pass" type="number" placeholder="${t('t_pass_ph')}" min="0" max="100"/>
+    <div class="inline-form">
+      <h3>${t('t_new_result')}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'اسم الامتحان':'Exam Name'}</label><input id="rx_exam" style="${iStyle()}" placeholder="${lang==='ar'?'مثال: منتصف الفصل':'e.g. Midterm 2025'}"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'التاريخ':'Date'}</label><input id="rx_date" style="${iStyle()}" placeholder="${lang==='ar'?'مثال: مارس 2025':'e.g. Mar 2025'}"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'متوسط الدرجة %':'Avg Score %'}</label><input id="rx_avg" type="number" min="0" max="100" style="${iStyle()}" placeholder="0–100"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'أعلى درجة %':'Top Score %'}</label><input id="rx_top" type="number" min="0" max="100" style="${iStyle()}" placeholder="0–100"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'معدل النجاح %':'Pass Rate %'}</label><input id="rx_pass" type="number" min="0" max="100" style="${iStyle()}" placeholder="0–100"/></div>
       </div>
-      <div class="if-actions"><button class="btn-sm-green" onclick="addResult()">${t('t_save')}</button><button class="btn-sm-cancel" onclick="toggleAddResult()">${t('cancel')}</button></div>
+      <div class="if-actions">
+        <button class="btn-sm-green" onclick="addResult()">${lang==='ar'?'حفظ':'Save'}</button>
+        <button class="btn-sm-cancel" onclick="toggleForm('addResultForm')">${lang==='ar'?'إلغاء':'Cancel'}</button>
+      </div>
     </div>
   </div>
-  ${s.subjects.length>0?`<div class="card" style="margin-bottom:20px"><div style="font-size:12px;color:#94a3b8;letter-spacing:2px;margin-bottom:16px">${t('t_subj_perf')}</div>
-    ${s.subjects.map(sub=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>${esc(sub.name)}</span><span style="color:#3b82f6;font-weight:700">${sub.avg}% avg · ${sub.pass}% pass</span></div>${progBar(sub.avg,sub.avg>=80?'#10b981':sub.avg>=70?'#3b82f6':'#f59e0b',8)}</div>`).join('')}
+  ${s.subjects.length>0?`<div class="card" style="margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:12px;color:#94a3b8;letter-spacing:2px">${t('t_subj_perf')}</div>
+      <button onclick="toggleForm('editSubjForm')" style="font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#94a3b8;cursor:pointer;">${lang==='ar'?'✏️ تعديل':'✏️ Edit'}</button>
+    </div>
+    <div id="editSubjForm" style="display:none;margin-bottom:16px">
+      ${s.subjects.map((sub,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="color:#fff;font-size:13px;width:120px">${esc(sub.name)}</div>
+          <div><label style="font-size:10px;color:#64748b">AVG%</label><input type="number" value="${sub.avg}" min="0" max="100" onchange="editSubject(${i},'avg',this.value)" style="${iStyle('width:65px;padding:6px 8px;margin-top:2px;')}"/></div>
+          <div><label style="font-size:10px;color:#64748b">PASS%</label><input type="number" value="${sub.pass}" min="0" max="100" onchange="editSubject(${i},'pass',this.value)" style="${iStyle('width:65px;padding:6px 8px;margin-top:2px;')}"/></div>
+        </div>`).join('')}
+    </div>
+    ${s.subjects.map(sub=>`<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px">
+        <span>${esc(sub.name)}</span>
+        <span style="color:#3b82f6;font-weight:700">${sub.avg}% avg · ${sub.pass}% pass</span>
+      </div>${progBar(sub.avg,sub.avg>=80?'#10b981':sub.avg>=70?'#3b82f6':'#f59e0b',8)}</div>`).join('')}
   </div>`:''}
   <div id="resultsList">${renderResultsList(s)}</div>`;
 }
 function renderResultsList(s){
   if(s.recentResults.length===0) return `<p class="empty">${t('t_no_results')}</p>`;
-  return s.recentResults.map(r=>`<div class="result-card">
-    <div><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(r.exam)}</div><div style="font-size:12px;color:#64748b">${esc(r.date)}</div></div>
-    ${[{l:t('t_avg_score'),v:r.avg,c:'#3b82f6'},{l:t('t_top_score'),v:r.top,c:'#10b981'},{l:t('t_pass_rate'),v:r.pass,c:'#f59e0b'}].map(m=>`<div class="result-metric"><div class="rv" style="color:${m.c}">${m.v}%</div><div class="rl">${m.l}</div></div>`).join('')}
-  </div>`).join('');
+  return s.recentResults.map((r,ri)=>`
+    <div class="result-card" id="rc-${ri}">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(r.exam)}</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">${esc(r.date)}</div>
+        <div style="display:flex;gap:24px">
+          ${[{l:t('t_avg_score'),f:'avg',v:r.avg,c:'#3b82f6'},{l:t('t_top_score'),f:'top',v:r.top,c:'#10b981'},{l:t('t_pass_rate'),f:'pass',v:r.pass,c:'#f59e0b'}].map(m=>`
+          <div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">${m.l}</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" value="${m.v}" min="0" max="100" onchange="editResult(${ri},'${m.f}',this.value)" style="${iStyle('width:60px;font-size:16px;font-weight:700;color:'+m.c+';padding:5px 7px;')}"/>
+              <span style="color:#64748b">%</span>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <input value="${esc(r.exam)}" onchange="editResult(${ri},'exam',this.value)" style="${iStyle('width:160px;font-size:13px;')}" placeholder="${lang==='ar'?'اسم الامتحان':'Exam name'}"/>
+        <input value="${esc(r.date)}" onchange="editResult(${ri},'date',this.value)" style="${iStyle('width:160px;font-size:13px;')}" placeholder="${lang==='ar'?'التاريخ':'Date'}"/>
+        <button onclick="deleteResult(${ri})" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;cursor:pointer;font-size:12px;padding:6px 14px;border-radius:6px;">✕ ${lang==='ar'?'حذف':'Delete'}</button>
+      </div>
+    </div>`).join('');
 }
-function toggleAddResult(){const f=document.getElementById('addResultForm');f.style.display=f.style.display==='none'?'block':'none';}
 function addResult(){
   const s=getSchool(activeSchoolId);
   const exam=document.getElementById('rx_exam').value.trim();
-  if(!exam) return;
-  s.recentResults.unshift({exam,date:document.getElementById('rx_date').value,avg:parseInt(document.getElementById('rx_avg').value)||0,top:parseInt(document.getElementById('rx_top').value)||0,pass:parseInt(document.getElementById('rx_pass').value)||0});
-  saveSchools();
+  if(!exam){alert(lang==='ar'?'أدخل اسم الامتحان':'Enter exam name');return;}
+  s.recentResults.unshift({
+    exam, date:document.getElementById('rx_date').value,
+    avg:parseInt(document.getElementById('rx_avg').value)||0,
+    top:parseInt(document.getElementById('rx_top').value)||0,
+    pass:parseInt(document.getElementById('rx_pass').value)||0
+  });
   document.getElementById('addResultForm').style.display='none';
-  ['rx_exam','rx_date','rx_avg','rx_top','rx_pass'].forEach(id=>document.getElementById(id).value='');
+  ['rx_exam','rx_date','rx_avg','rx_top','rx_pass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('resultsList').innerHTML=renderResultsList(s);
 }
+function editResult(ri,field,val){
+  const s=getSchool(activeSchoolId);
+  if(!s.recentResults[ri])return;
+  if(field==='avg'||field==='top'||field==='pass') s.recentResults[ri][field]=Math.min(100,Math.max(0,parseInt(val)||0));
+  else s.recentResults[ri][field]=val;
+}
+function deleteResult(ri){
+  const s=getSchool(activeSchoolId);
+  s.recentResults.splice(ri,1);
+  document.getElementById('resultsList').innerHTML=renderResultsList(s);
+}
+function editSubject(i,field,val){
+  const s=getSchool(activeSchoolId);
+  if(s.subjects[i]) s.subjects[i][field]=Math.min(100,Math.max(0,parseInt(val)||0));
+}
+function toggleAddResult(){toggleForm('addResultForm');}
 
+// ── FEES / FINANCE ──
 function renderSchFinance(s) {
   const r=pct(s.fees.collected,s.fees.total||1);
-  return `<div class="page-title">${t('t_fee_mgmt')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_fee_sub')}</div>
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div><div class="page-title" style="margin-bottom:0">${t('t_fee_mgmt')}</div><div class="page-sub" style="margin-bottom:0;margin-top:4px">${t('t_fee_sub')}</div></div>
+  </div>
   <div class="grid-3" style="margin-bottom:28px">
     ${[{l:t('t_total_fees_lbl'),v:fmt(s.fees.total),c:'#64748b',i:'💼'},{l:t('t_collected_lbl'),v:fmt(s.fees.collected),c:'#10b981',i:'✅'},{l:t('t_pending_lbl'),v:fmt(s.fees.pending),c:'#ef4444',i:'⏳'}].map((c,i)=>`<div class="card" style="animation:contentIn .5s ease both ${i*0.1}s"><div style="font-size:28px">${c.i}</div><div style="font-size:28px;font-weight:700;color:${c.c};margin:8px 0 4px">${c.v}</div><div style="color:#64748b;font-size:13px">${c.l}</div></div>`).join('')}
   </div>
-  <div class="card">
+  <div class="card" style="margin-bottom:20px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div style="font-size:12px;color:#94a3b8;letter-spacing:2px">${t('t_fee_coll_rate').toUpperCase()}</div>
       <span style="font-size:32px;font-weight:700;color:${r>90?'#10b981':'#f59e0b'}">${r}%</span>
     </div>
-    <div style="height:16px;background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden"><div style="height:100%;width:${r}%;border-radius:8px;background:${r>90?'linear-gradient(90deg,#10b981,#059669)':'linear-gradient(90deg,#f59e0b,#d97706)'};animation:progGrow 1s cubic-bezier(.4,0,.2,1) both .3s;"></div></div>
-    <div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:12px;color:#64748b">0%</span><span style="font-size:12px;color:#64748b">100%</span></div>
+    <div style="height:16px;background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden"><div style="height:100%;width:${r}%;border-radius:8px;background:${r>90?'linear-gradient(90deg,#10b981,#059669)':'linear-gradient(90deg,#f59e0b,#d97706)'};"></div></div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:20px">✏️ ${lang==='ar'?'تعديل بيانات الرسوم':'Edit Fee Data'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+      ${[{k:'total',l:lang==='ar'?'إجمالي الرسوم المستحقة':'Total Fees Due',v:s.fees.total},
+         {k:'collected',l:lang==='ar'?'المبلغ المحصل':'Amount Collected',v:s.fees.collected},
+         {k:'pending',l:lang==='ar'?'المبلغ المتبقي':'Amount Pending',v:s.fees.pending}].map(f=>`
+        <div>
+          <label style="font-size:11px;color:#64748b;display:block;margin-bottom:6px">${f.l}</label>
+          <input type="number" id="fee_${f.k}" value="${f.v}" min="0" style="${iStyle('font-size:15px;font-weight:600;')}"/>
+        </div>`).join('')}
+    </div>
+    <button onclick="saveFees()" style="padding:12px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">${lang==='ar'?'💾 حفظ':'💾 Save'}</button>
+    <span id="feeSaved" style="margin-left:12px;color:#10b981;font-size:13px;display:none">✓ ${lang==='ar'?'تم الحفظ!':'Saved!'}</span>
   </div>`;
 }
+function saveFees(){
+  const s=getSchool(activeSchoolId);
+  s.fees.total=parseInt(document.getElementById('fee_total').value)||0;
+  s.fees.collected=parseInt(document.getElementById('fee_collected').value)||0;
+  s.fees.pending=Math.max(0,s.fees.total-s.fees.collected);
+  const msg=document.getElementById('feeSaved');
+  if(msg){msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
+  renderSchool('finance');
+}
 
+// ── ANNOUNCEMENTS ──
 function renderSchAnnouncements(s) {
-  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
     <div class="page-title" style="margin-bottom:0">${t('nav_announce')}</div>
-    <button onclick="toggleAddAnn()" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;transition:all .22s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_ann_new')}</button>
+    <button onclick="toggleForm('addAnnForm')" style="padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;">${t('t_ann_new')}</button>
   </div>
   <div id="addAnnForm" style="display:none">
     <div class="inline-form"><h3>${t('t_ann_new_label')}</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <input id="ann_title" placeholder="${t('t_ann_title_ph')}" style="padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:13px"/>
-        <input id="ann_date" placeholder="${t('t_ann_date_ph')}" style="padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:13px"/>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'العنوان':'Title'}</label><input id="ann_title" style="${iStyle()}" placeholder="${t('t_ann_title_ph')}"/></div>
+        <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">${lang==='ar'?'التاريخ':'Date'}</label><input id="ann_date" type="date" style="${iStyle()}"/></div>
       </div>
       <textarea id="ann_body" rows="3" placeholder="${t('t_ann_body_ph')}"></textarea>
-      <div class="if-actions"><button class="btn-sm-green" onclick="addAnnouncement()">${t('t_ann_post')}</button><button class="btn-sm-cancel" onclick="toggleAddAnn()">${t('cancel')}</button></div>
+      <div class="if-actions">
+        <button class="btn-sm-green" onclick="addAnnouncement()">${t('t_ann_post')}</button>
+        <button class="btn-sm-cancel" onclick="toggleForm('addAnnForm')">${t('cancel')}</button>
+      </div>
     </div>
   </div>
   <div id="annList">${renderAnnList(s)}</div>`;
 }
 function renderAnnList(s){
   if(s.announcements.length===0) return `<p class="empty">${t('t_no_ann')}</p>`;
-  return s.announcements.map(a=>`<div class="ann-card">
-    <div style="font-size:24px;margin-top:2px">📢</div>
-    <div style="flex:1"><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(a.title)}</div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px">${esc(a.date)}</div>
-      <div style="font-size:14px;color:#94a3b8">${esc(a.body)}</div>
-    </div>
-    <button class="ann-del" onclick="removeAnn(${a.id})">✕</button>
-  </div>`).join('');
+  return s.announcements.map(a=>`
+    <div class="ann-card" id="ann-${a.id}">
+      <div style="font-size:24px;margin-top:2px">📢</div>
+      <div style="flex:1">
+        <input value="${esc(a.title)}" onchange="editAnn(${a.id},'title',this.value)" style="${iStyle('font-weight:700;font-size:15px;margin-bottom:8px;')}" placeholder="${lang==='ar'?'العنوان':'Title'}"/>
+        <input value="${esc(a.date)}" onchange="editAnn(${a.id},'date',this.value)" type="date" style="${iStyle('font-size:12px;color:#64748b;margin-bottom:8px;width:160px;')}"/>
+        <textarea rows="2" onchange="editAnn(${a.id},'body',this.value)" style="${iStyle('resize:none;font-size:13px;color:#94a3b8;')}" placeholder="${lang==='ar'?'النص':'Body'}">${esc(a.body)}</textarea>
+      </div>
+      <button class="ann-del" onclick="removeAnn(${a.id})" title="${lang==='ar'?'حذف':'Delete'}">✕</button>
+    </div>`).join('');
 }
-function toggleAddAnn(){const f=document.getElementById('addAnnForm');f.style.display=f.style.display==='none'?'block':'none';}
+function toggleAddAnn(){toggleForm('addAnnForm');}
 function addAnnouncement(){
   const s=getSchool(activeSchoolId);
-  const title=document.getElementById('ann_title').value.trim(); if(!title) return;
+  const title=document.getElementById('ann_title').value.trim();
+  if(!title){alert(lang==='ar'?'أدخل العنوان':'Enter a title');return;}
   s.announcements.unshift({id:Date.now(),title,date:document.getElementById('ann_date').value,body:document.getElementById('ann_body').value.trim()});
-  saveSchools();
   document.getElementById('addAnnForm').style.display='none';
-  ['ann_title','ann_date','ann_body'].forEach(id=>document.getElementById(id).value='');
+  ['ann_title','ann_date','ann_body'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('annList').innerHTML=renderAnnList(s);
+}
+function editAnn(id,field,val){
+  const s=getSchool(activeSchoolId);
+  const a=s.announcements.find(x=>x.id===id);
+  if(a) a[field]=val;
 }
 function removeAnn(id){
   const s=getSchool(activeSchoolId);
   s.announcements=s.announcements.filter(a=>a.id!==id);
-  saveSchools();
   document.getElementById('annList').innerHTML=renderAnnList(s);
 }
 
+// ── PROFILE ──
 function renderSchProfile(s) {
   return `<div class="page-title">${t('t_sch_profile')}</div><div class="page-sub" style="margin-bottom:24px">${t('t_update_info')}</div>
-  <div class="card" style="max-width:600px">
-    <div style="margin-bottom:20px">
-      <div style="font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:4px">${t('t_sch_name_lbl')}</div>
-      <div style="font-size:18px;font-weight:700">${esc(s.name)}</div>
-    </div>
-    <div style="margin-bottom:24px">
-      <div style="font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:4px">${t('t_sch_id_lbl')}</div>
-      <div style="font-size:14px;color:#94a3b8">${esc(s.id)}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      ${[{k:'principal',l:t('t_principal'),t:'text',v:s.principal},{k:'email',l:'Email',t:'email',v:s.email},{k:'phone',l:t('f_phone'),t:'text',v:s.phone},{k:'students',l:t('t_students_count'),t:'number',v:s.students},{k:'teachers',l:t('t_teachers_count'),t:'number',v:s.teachers}].map(f=>`<div>
+  <div class="card" style="max-width:680px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      ${[
+        {k:'name',   l:lang==='ar'?'اسم المدرسة':'School Name',       type:'text',  v:s.name},
+        {k:'principal',l:lang==='ar'?'اسم المدير':'Principal Name',   type:'text',  v:s.principal},
+        {k:'email',  l:'Email',                                         type:'email', v:s.email},
+        {k:'phone',  l:lang==='ar'?'الهاتف':'Phone',                   type:'text',  v:s.phone, dir:'ltr'},
+        {k:'students',l:lang==='ar'?'عدد الطلاب':'No. of Students',   type:'number',v:s.students},
+        {k:'teachers',l:lang==='ar'?'عدد المعلمين':'No. of Teachers', type:'number',v:s.teachers},
+      ].map(f=>`<div>
         <label style="display:block;font-size:11px;color:#64748b;letter-spacing:1px;margin-bottom:6px">${f.l.toUpperCase()}</label>
-        <input type="${f.t}" id="pf_${f.k}" value="${esc(String(f.v))}" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-family:Georgia,serif;font-size:14px;box-sizing:border-box;transition:border .22s;" onfocus="this.style.borderColor='rgba(59,130,246,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+        <input type="${f.type}" id="pf_${f.k}" value="${esc(String(f.v))}" dir="${f.dir||'auto'}"
+          style="${iStyle('font-size:14px;')}"
+          onfocus="this.style.borderColor='rgba(59,130,246,.7)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.15)'"/>
       </div>`).join('')}
     </div>
-    <button id="saveProfileBtn" onclick="saveProfile()" style="margin-top:24px;padding:12px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;font-size:14px;transition:all .25s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${t('t_save_changes')}</button>
+    <div style="margin-top:24px;display:flex;align-items:center;gap:16px">
+      <button id="saveProfileBtn" onclick="saveProfile()" style="padding:12px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;font-family:Georgia,serif;font-weight:700;font-size:14px;">${t('t_save_changes')}</button>
+      <span id="profileSaved" style="color:#10b981;font-size:13px;display:none">✓ ${lang==='ar'?'تم الحفظ!':'Saved!'}</span>
+    </div>
   </div>`;
 }
 function saveProfile(){
   const s=getSchool(activeSchoolId);
-  s.principal=document.getElementById('pf_principal').value.trim()||s.principal;
-  s.email=document.getElementById('pf_email').value.trim()||s.email;
-  s.phone=document.getElementById('pf_phone').value.trim()||s.phone;
-  s.students=parseInt(document.getElementById('pf_students').value)||s.students;
-  s.teachers=parseInt(document.getElementById('pf_teachers').value)||s.teachers;
-  saveSchools();
-  const btn=document.getElementById('saveProfileBtn');
-  btn.textContent=t('t_saved'); btn.style.background='#10b981';
-  setTimeout(()=>{btn.textContent=t('t_save_changes'); btn.style.background='linear-gradient(135deg,#10b981,#059669)';}, 2000);
+  const get=id=>document.getElementById(id);
+  s.name    = get('pf_name')?.value.trim()||s.name;
+  s.principal=get('pf_principal')?.value.trim()||s.principal;
+  s.email   = get('pf_email')?.value.trim()||s.email;
+  s.phone   = get('pf_phone')?.value.trim()||s.phone;
+  s.students= parseInt(get('pf_students')?.value)||s.students;
+  s.teachers= parseInt(get('pf_teachers')?.value)||s.teachers;
+  document.getElementById('sidebarSchoolName').textContent=s.name;
+  const msg=document.getElementById('profileSaved');
+  if(msg){msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
